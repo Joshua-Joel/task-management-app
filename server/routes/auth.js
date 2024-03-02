@@ -19,7 +19,7 @@ router.post("/login", async (req, res) => {
     // Compare passwords
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
-      return res.status(401).json({ error: "Invalid credentials" });
+      return res.status(401).json({ error: "Invalid credentials" }); 
     }
     const expirationDate = new Date();
     expirationDate.setDate(expirationDate.getDate() + 7);
@@ -33,7 +33,7 @@ router.post("/login", async (req, res) => {
       httpOnly: true,
       sameSite:"lax",
       expire : 24 * 60 * 60 * 1000 
-    }).json({token,message:"success"});
+    }).json({token,message:"success",role:user.role});
     
   } catch (error) {
     res.status(500).json({ error: error.message });
