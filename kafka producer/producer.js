@@ -31,7 +31,6 @@ const produceMessage = async () => {
     messages.push({key:"key-1",value:JSON.stringify(Obj)})
     kafkaInstance.produce("my-topic", messages);
   }
-
 };
 
 cron.schedule("*/5 * * * * *", () => {
