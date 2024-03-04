@@ -250,6 +250,37 @@ export default function AllTasksTable() {
   const isSelected = (id) => selected.indexOf(id) !== -1;
   const emptyRows =
     page > 0 ? Math.max(0, (1 + page) * rowsPerPage - data.length) : 0;
+  
+    const exportToCSV = () => {
+    const csvData = [];
+
+    // Adding CSV header
+    const header = headCells.map((headCell) => headCell.label);
+    csvData.push(header);
+
+    // Adding rows
+    data.forEach((row) => {
+      const rowData = [
+        row.name,
+        row.task_name,
+        row.task_desc,
+        row.assignee_name,
+        row.assignee_id,
+        formatDate(row.created_at),
+        formatDate(row.dead_line),
+        row.effort,
+        row.status,
+      ];
+
+      csvData.push(rowData);
+    });
+    // Convert to CSV string
+    const csvString = csvData.map((row) => row.join(",")).join("\n");
+
+    // Create a Blob and trigger download
+    const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8' });
+    saveAs(blob, 'tasks.csv');
+  };
 
   return (
     <Box sx={{ width: "100%" }}>
@@ -340,6 +371,7 @@ export default function AllTasksTable() {
           onPageChange={handleChangePage}
           onRowsPerPageChange={handleChangeRowsPerPage}
         />
+        <Button onClick={exportToCSV}>Export to CSV</Button>
       </Paper>
     </Box>
   );

@@ -15,6 +15,7 @@ import { Button, Typography } from "@mui/material";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import AutorenewIcon from "@mui/icons-material/Autorenew";
 import ReportProblemIcon from "@mui/icons-material/ReportProblem";
+import { saveAs } from 'file-saver'; 
 
 
 const headCells = [
@@ -254,6 +255,37 @@ export default function EnhancedTable() {
         ),
       [page, rowsPerPage,data],
     );
+  const exportToCSV = () => {
+    const csvData = [];
+
+    // Adding CSV header
+    const header = headCells.map((headCell) => headCell.label);
+    csvData.push(header);
+
+    // Adding rows
+    data.forEach((row) => {
+      const rowData = [
+        row.name,
+        row.task_name,
+        row.task_desc,
+        row.assigner_name,
+        row.assigner_id,
+        formatDate(row.created_at),
+        formatDate(row.dead_line),
+        row.effort,
+        // row.status,
+      ];
+
+      csvData.push(rowData);
+    });
+
+    // Convert to CSV string
+    const csvString = csvData.map((row) => row.join(",")).join("\n");
+
+    // Create a Blob and trigger download
+    const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8' });
+    saveAs(blob, 'my_tasks.csv');
+  };
 
     
 
@@ -383,6 +415,7 @@ export default function EnhancedTable() {
           onPageChange={handleChangePage}
           onRowsPerPageChange={handleChangeRowsPerPage}
         />
+        <Button onClick={exportToCSV}>Export to CSV</Button>
       </Paper>
     </Box>
   );
