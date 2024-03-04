@@ -18,7 +18,8 @@ import { Button, Typography } from "@mui/material";
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import AutorenewIcon from '@mui/icons-material/Autorenew';
 import ReportProblemIcon from '@mui/icons-material/ReportProblem';
-import EditWizard from "../EditWizard/EditWizard";
+import EditWizard from "../editwizard/EditWizard";
+import { saveAs } from 'file-saver';
 
 
 const headCells = [
@@ -255,13 +256,13 @@ export default function AllTasksTable() {
     const csvData = [];
 
     // Adding CSV header
-    const header = headCells.map((headCell) => headCell.label);
+    const header = headCells.slice(0, -1).map((headCell) => headCell.label);
+    console.log(header);
     csvData.push(header);
 
     // Adding rows
     data.forEach((row) => {
       const rowData = [
-        row.name,
         row.task_name,
         row.task_desc,
         row.assignee_name,

@@ -259,13 +259,13 @@ export default function EnhancedTable() {
     const csvData = [];
 
     // Adding CSV header
-    const header = headCells.map((headCell) => headCell.label);
+    const header = headCells.slice(0, -1).map((headCell) => headCell.label);
+    console.log(header);
     csvData.push(header);
 
     // Adding rows
     data.forEach((row) => {
       const rowData = [
-        row.name,
         row.task_name,
         row.task_desc,
         row.assigner_name,
@@ -273,7 +273,7 @@ export default function EnhancedTable() {
         formatDate(row.created_at),
         formatDate(row.dead_line),
         row.effort,
-        // row.status,
+        row.status,
       ];
 
       csvData.push(rowData);
@@ -374,14 +374,14 @@ export default function EnhancedTable() {
                       row.status === 'C'?
                       <Button
                           variant="contained"
-                          disabled="true"
+                          disabled={true}
                         >
                           Completed
                         </Button>
                         :
                         <Button
                           variant="contained"
-                          disabled="true"
+                          disabled={true}
                         >
                           Pending
                         </Button>
