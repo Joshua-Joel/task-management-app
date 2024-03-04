@@ -1,5 +1,6 @@
-const KafkaConfig = require("./config/config")
+import  KafkaConfig from "./config/config.js"
 
-KafkaConfig.consume("my-topic",(value)=>{
+const kafkaConfig = new KafkaConfig();
+kafkaConfig.consume("my-topic",(value)=>{
   console.log("Received :",value);
 })

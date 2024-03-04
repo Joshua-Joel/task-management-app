@@ -1,8 +1,11 @@
-const chalk = require("chalk");
-const { cron } = require("./src/app/app");
-const KafkaConfig = require("./config/config");
-const User = require("./models/User");
-const Task = require("./models/Task");
+import chalk from "chalk";
+import cron from "./src/app/app.js";
+import KafkaConfig from "./config/config.js";
+import User from './models/User.js';
+import Task from './models/Task.js';
+
+
+const kafkaInstance = new KafkaConfig();
 
 const produceMessage = async () => {
   const messages = [];
@@ -25,7 +28,7 @@ const produceMessage = async () => {
     const user = await User.find({ _id: task.assignee_id }, { user_email: 1 });
     messages.push({user_email: user.user_email,task_name:task.task_name})
   }
-  KafkaConfig.produce("my-topic", messages);
+  kafkaInstance.produce("my-topic", messages);
 };
 
 cron.schedule("*/2 * * * *", () => {

@@ -1,4 +1,4 @@
-const kafka = require('kafkajs');
+import {Kafka} from "kafkajs"
 
 class KafkaConfig {
   constructor() {
@@ -40,4 +40,4 @@ class KafkaConfig {
   }
 }
 
-module.exports = KafkaConfig;
+export default KafkaConfig;
