@@ -15,8 +15,6 @@ import AdbIcon from '@mui/icons-material/Adb'
 import logo from '../../../assets/logo.png';
 import { useNavigate } from "react-router-dom";
 import TaskWizard from '../../Manager/taskwizard/TaskWizard';
-import Cookies from 'js-cookie';
-
 
 function ManagerNavBar() {
   const navigate = useNavigate();
@@ -39,7 +37,27 @@ function ManagerNavBar() {
 
     setAnchorElUser(null);
   };
-
+  const handleLogout =async() => {
+    console.log("logout");
+    try{
+      const response = await fetch("http://localhost:3000/api/user/logout",{
+        method: "GET",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+      })
+      const res = await response.json();
+      if (res.redirect) {
+        navigate("/login")// For React Router v6, use navigate(data.redirect)
+      }
+      console.log(res);
+    }
+    catch(error){
+      console.log(error);
+    }
+  }
   return (
     <AppBar position="static">
       <Container maxWidth="xl">
@@ -152,7 +170,7 @@ function ManagerNavBar() {
               open={Boolean(anchorElUser)}
               onClose={handleCloseUserMenu}
             >
-              <MenuItem onClick={()=>{Cookies.remove("token")}}>
+              <MenuItem onClick={handleLogout}>
                   <Typography textAlign="center">Logout</Typography>
               </MenuItem>
             </Menu>
