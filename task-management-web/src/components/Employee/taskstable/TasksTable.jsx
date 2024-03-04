@@ -9,17 +9,12 @@ import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TablePagination from "@mui/material/TablePagination";
 import TableRow from "@mui/material/TableRow";
-import TableSortLabel from "@mui/material/TableSortLabel";
 import Toolbar from "@mui/material/Toolbar";
 import Paper from "@mui/material/Paper";
-import DeleteIcon from "@mui/icons-material/Delete";
-import { visuallyHidden } from "@mui/utils";
 import { Button, Typography } from "@mui/material";
-import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
-import AutorenewIcon from '@mui/icons-material/Autorenew';
-import ReportProblemIcon from '@mui/icons-material/ReportProblem';
-import EditWizard from "../editwizard/EditWizard";
-
+import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
+import AutorenewIcon from "@mui/icons-material/Autorenew";
+import ReportProblemIcon from "@mui/icons-material/ReportProblem";
 
 const headCells = [
   {
@@ -35,16 +30,16 @@ const headCells = [
     label: "Description",
   },
   {
-    id: "Employee",
+    id: "Assigner",
     numeric: false,
     disablePadding: false,
-    label: "Employee",
+    label: "Assigner",
   },
   {
-    id: "Employee id",
+    id: "Assigner id",
     numeric: false,
     disablePadding: false,
-    label: "Employee id",
+    label: "Assigner id",
   },
   {
     id: "Created on",
@@ -79,11 +74,6 @@ const headCells = [
 ];
 
 function TasksTable(props) {
-  const { order, orderBy, onRequestSort } = props;
-  const createSortHandler = (property) => (event) => {
-    onRequestSort(event, property);
-  };
-
   return (
     <TableHead>
       <TableRow>
@@ -93,20 +83,8 @@ function TasksTable(props) {
             key={headCell.id}
             align={headCell.numeric ? "right" : "left"}
             padding={headCell.disablePadding ? "none" : "normal"}
-            sortDirection={orderBy === headCell.id ? order : false}
           >
-            <TableSortLabel
-              active={orderBy === headCell.id}
-              direction={orderBy === headCell.id ? order : "asc"}
-              onClick={createSortHandler(headCell.id)}
-            >
-              {headCell.label}
-              {orderBy === headCell.id ? (
-                <Box component="span" sx={visuallyHidden}>
-                  {order === "desc" ? "sorted descending" : "sorted ascending"}
-                </Box>
-              ) : null}
-            </TableSortLabel>
+            {headCell.label}
           </TableCell>
         ))}
       </TableRow>
@@ -146,7 +124,7 @@ function EnhancedTableToolbar(props) {
         id="tableTitle"
         component="div"
       >
-        All tasks
+        My tasks
       </Typography>
     </Toolbar>
   );
@@ -156,17 +134,13 @@ EnhancedTableToolbar.propTypes = {
   numSelected: PropTypes.number.isRequired,
 };
 
-export default function AllTasksTable() {
+export default function MyTasksTable() {
   const [data, setData] = useState([]);
   const formatDate = (inputDate) => {
     const date = new Date(inputDate);
-
-    // Extracting day, month, and year
     const day = date.getDate().toString().padStart(2, "0");
-    const month = (date.getMonth() + 1).toString().padStart(2, "0"); // Months are zero-based
+    const month = (date.getMonth() + 1).toString().padStart(2, "0");
     const year = date.getFullYear();
-
-    // Creating the formatted date string
     const formattedDate = `${day}-${month}-${year}`;
 
     return formattedDate;
@@ -204,30 +178,28 @@ export default function AllTasksTable() {
     setOrderBy(property);
   };
 
-  const handleDelete = async (task_id,index) => {
-    try{
-        const response = await fetch(`http://localhost:3000/api/task/delete-task?task_id=${task_id}`,{
-            method: "DELETE",
-            credentials: "include",
-            headers: {
-              "Content-Type": "application/json",
-              Accept: "application/json",
-            }
-        })
-        if(response.ok){
-            const result = await response.json();
-            console.log(result);
-            const newData = [...data];
-            newData.splice(index, 1);
-
-            // Updating the state with the new array
-            setData(newData);
+  const handleComplete = async (task_id, index) => {
+    try {
+      const response = await fetch(
+        `http://localhost:3000/api/task/complete-task?task_id=${task_id}`,
+        {
+          method: "PATCH",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
         }
+      );
+      if (response.ok) {
+        const updatedData = [...data];
+        updatedData[index].status = "C"; 
+        setData(updatedData);
+      }
+    } catch (err) {
+      console.log(err);
     }
-    catch(err){
-        console.log(err);
-    }
-  }
+  };
 
   const handleSelectAllClick = (event) => {
     if (event.target.checked) {
@@ -295,8 +267,8 @@ export default function AllTasksTable() {
                     </TableCell>
                     <TableCell align="left">{row.task_name}</TableCell>
                     <TableCell align="left">{row.task_desc}</TableCell>
-                    <TableCell align="left">{row.assignee_name}</TableCell>
-                    <TableCell align="left">{row.assignee_id}</TableCell>
+                    <TableCell align="left">{row.assigner_name}</TableCell>
+                    <TableCell align="left">{row.assigner_id}</TableCell>
                     <TableCell align="left">
                       {formatDate(row.created_at)}
                     </TableCell>
@@ -304,15 +276,22 @@ export default function AllTasksTable() {
                       {formatDate(row.dead_line)}
                     </TableCell>
                     <TableCell align="right">{row.effort}</TableCell>
-                    <TableCell align="left">{row.status==="C"?<CheckCircleOutlineIcon style={{color:"green"}}/>:row.status==="P"?<AutorenewIcon style={{color:"yellow"}}/>:<ReportProblemIcon style={{color:"red"}}/>}</TableCell>
+                    <TableCell align="left">
+                      {row.status === "C" ? (
+                        <CheckCircleOutlineIcon style={{ color: "green" }} />
+                      ) : row.status === "P" ? (
+                        <AutorenewIcon style={{ color: "yellow" }} />
+                      ) : (
+                        <ReportProblemIcon style={{ color: "red" }} />
+                      )}
+                    </TableCell>
                     <TableCell align="left">
                       <div style={{ display: "flex", flexDirection: "row" }}>
-                        <EditWizard values={row}/>
-                        <Button onClick={()=>handleDelete(row._id,index)}>
-                        
-                          <DeleteIcon
-                            style={{ color: "red", padding: "4px" }}
-                          />
+                        <Button
+                          variant="contained"
+                          onClick={() => handleComplete(row._id, index)}
+                        >
+                          complete
                         </Button>
                       </div>
                     </TableCell>

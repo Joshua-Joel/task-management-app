@@ -3,6 +3,7 @@ const express = require("express");
 const router = express.Router();
 const User = require("../models/User");
 const bcrypt = require("bcrypt");
+const authenticateToken = require("../middleware/authMiddleware");
 
 router.post("/register", async (req, res) => {
   console.log(req.body);
@@ -34,5 +35,10 @@ router.post("/register", async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
+
+router.get("/logout",(req,res)=>{
+  res.cookie('token', '', { expires: new Date(0) });
+  res.redirect('/');
+})
 
 module.exports = router;

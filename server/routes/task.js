@@ -87,7 +87,7 @@ router.get("/tasks", authenticateToken((role = "")), async (req, res) => {
     } else {
       var tasks = await Task.find(
         { assignee_id: user_id },
-        { _id: 0, assignee_id: 0, __v: 0 }
+        { __v: 0 }
       );
       modTasks = [];
       for (var i = 0; i < tasks.length; i++) {
@@ -177,5 +177,21 @@ router.patch("/update-task", authenticateToken("manager"), async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
+
+router.patch("/complete-task",authenticateToken(role=""),async (req,res)=>{
+  try{
+    const task_id = req.query.task_id;
+    const updated_task = await Task.updateOne({_id:task_id},{status:"C"});
+    if(updated_task){
+      res.status(200).json({message: "task completed successfully"});
+    }
+    else{
+      res.status(400).json({message: "task not found"});
+    }
+  }
+  catch(error) {
+    res.status(500).json({ error: error.message });
+  }
+})
 
 module.exports = router;

@@ -40,6 +40,7 @@ export default function TaskWizard() {
       })
       const res = await response.json();
       console.log(res);
+      setOpen(false); 
     }
     catch(err){
       console.log(err);

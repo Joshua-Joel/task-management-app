@@ -14,7 +14,6 @@ import MenuItem from '@mui/material/MenuItem';
 import AdbIcon from '@mui/icons-material/Adb'
 import logo from '../../../assets/logo.png';
 import { useNavigate } from "react-router-dom";
-import Cookies from 'js-cookie';
 
 
 function EmployeeNavBar() {
@@ -39,6 +38,21 @@ function EmployeeNavBar() {
     setAnchorElUser(null);
   };
 
+  const handleLogout = aysnc ()=> {
+    try{
+      const response = await fectch("",{
+        method: "GET",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+      })
+    }
+    catch(error){
+      console.log(error);
+    }
+  }
   return (
     <AppBar position="static">
       <Container maxWidth="xl">
@@ -147,7 +161,7 @@ function EmployeeNavBar() {
               open={Boolean(anchorElUser)}
               onClose={handleCloseUserMenu}
             >
-              <MenuItem onClick={()=>{Cookies.remove("token")}}>
+              <MenuItem onClick={handleLogout}>
                   <Typography textAlign="center">Logout</Typography>
               </MenuItem>
             </Menu>

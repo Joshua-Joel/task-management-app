@@ -107,7 +107,7 @@ export const Login = () => {
               style={{ margin: " 10px 0 10px 0" }}
               id="useremail-id"
               name="user_email"
-              label="User name"
+              label="User email"
               variant="outlined"
               value={formData.user_email}
               onChange={handleInputChange}
