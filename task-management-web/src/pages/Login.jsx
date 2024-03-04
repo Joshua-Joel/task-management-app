@@ -48,13 +48,16 @@ export const Login = () => {
           setNotFoundStatus(true);
         }
         else if(data.error==="Invalid credentials"){
+          setFormData({...formData,
+            password: "",
+          });
           setWrongPasswordStatus(true);
         }
       }
-      setFormData({
-        user_email: "",
-        password: "",
-      });
+      // setFormData({
+      //   user_email: "",
+      //   password: "",
+      // });
     } catch (error) {
       console.log(error)
     }

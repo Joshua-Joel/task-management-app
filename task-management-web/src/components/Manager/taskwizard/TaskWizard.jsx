@@ -138,6 +138,7 @@ export default function TaskWizard() {
                 name="effort"
                 label="Effort"
                 variant="outlined"
+                
                 value={taskData.effort}
                 onChange={handleInputChange}
               />

@@ -73,7 +73,11 @@ const headCells = [
   },
 ];
 
-function TasksTable(props) {
+function EnhancedTableHead(props) {
+  
+  
+
+
   return (
     <TableHead>
       <TableRow>
@@ -92,7 +96,7 @@ function TasksTable(props) {
   );
 }
 
-TasksTable.propTypes = {
+EnhancedTableHead.propTypes = {
   numSelected: PropTypes.number.isRequired,
   onRequestSort: PropTypes.func.isRequired,
   onSelectAllClick: PropTypes.func.isRequired,
@@ -134,7 +138,7 @@ EnhancedTableToolbar.propTypes = {
   numSelected: PropTypes.number.isRequired,
 };
 
-export default function MyTasksTable() {
+export default function EnhancedTable() {
   const [data, setData] = useState([]);
   const formatDate = (inputDate) => {
     const date = new Date(inputDate);
@@ -145,6 +149,14 @@ export default function MyTasksTable() {
 
     return formattedDate;
   };
+
+  function sortByStatus(a,b)  {
+        if(a.status === 'P' )
+        return -1;
+        if(a.status === 'C' )
+        return 1;
+      // return 0;
+  }
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -158,14 +170,17 @@ export default function MyTasksTable() {
         });
 
         const result = await response.json();
+        
+        result.sort(sortByStatus);
         setData(result);
+        
       } catch (error) {
         console.error("Error fetching data:", error);
       }
     };
 
     fetchData();
-  }, []);
+  },[]);
   const [order, setOrder] = React.useState("asc");
   const [orderBy, setOrderBy] = React.useState("calories");
   const [selected, setSelected] = React.useState([]);
@@ -211,11 +226,14 @@ export default function MyTasksTable() {
   };
 
   const handleChangePage = (event, newPage) => {
+   
+
     setPage(newPage);
   };
 
   const handleChangeRowsPerPage = (event) => {
     setRowsPerPage(parseInt(event.target.value, 10));
+    console.log("Current Page:", rowsPerPage);
     setPage(0);
   };
 
@@ -223,7 +241,21 @@ export default function MyTasksTable() {
   const emptyRows =
     page > 0 ? Math.max(0, (1 + page) * rowsPerPage - data.length) : 0;
 
+    const visibleRows = React.useMemo(
+      () =>
+        [...data].slice(
+          page * rowsPerPage,
+          page * rowsPerPage + rowsPerPage,
+        ),
+      [order, orderBy, page, rowsPerPage],
+    );
+
+    // [...data].slice(page * rowsPerPage,page * rowsPerPage + rowsPerPage);
+
+    // console.log(page)
+
   return (
+    
     <Box sx={{ width: "100%" }}>
       <Paper sx={{ width: "100%", mb: 2 }}>
         <EnhancedTableToolbar numSelected={selected.length} />
@@ -233,7 +265,7 @@ export default function MyTasksTable() {
             aria-labelledby="tableTitle"
             size={"medium"}
           >
-            <TasksTable
+            <EnhancedTableHead
               numSelected={selected.length}
               order={order}
               orderBy={orderBy}
@@ -242,7 +274,7 @@ export default function MyTasksTable() {
               rowCount={data.length}
             />
             <TableBody>
-              {data.map((row, index) => {
+              {visibleRows.map((row, index) => {
                 const isItemSelected = isSelected(index);
                 const labelId = `enhanced-table-checkbox-${index}`;
 
@@ -287,12 +319,24 @@ export default function MyTasksTable() {
                     </TableCell>
                     <TableCell align="left">
                       <div style={{ display: "flex", flexDirection: "row" }}>
+                      {
+                        row.status==='C'?
+                        // <p>Completed</p>
                         <Button
+                        variant="contained"
+                        disabled="true"
+                      >
+                        Completed
+                      </Button>
+                        :
+                          <Button
                           variant="contained"
                           onClick={() => handleComplete(row._id, index)}
                         >
-                          complete
+                          Complete
                         </Button>
+                      }
+                        
                       </div>
                     </TableCell>
                   </TableRow>
@@ -323,3 +367,6 @@ export default function MyTasksTable() {
     </Box>
   );
 }
+
+
+
