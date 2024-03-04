@@ -248,7 +248,7 @@ export default function EnhancedTable() {
           page * rowsPerPage,
           page * rowsPerPage + rowsPerPage,
         ),
-      [order, orderBy, page, rowsPerPage],
+      [page, rowsPerPage,data],
     );
   const exportToCSV = () => {
     const csvData = [];

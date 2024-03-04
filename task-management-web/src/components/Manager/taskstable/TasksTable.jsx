@@ -18,8 +18,7 @@ import { Button, Typography } from "@mui/material";
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import AutorenewIcon from '@mui/icons-material/Autorenew';
 import ReportProblemIcon from '@mui/icons-material/ReportProblem';
-import EditWizard from "../EditWizard/EditWizard";
-import { saveAs } from 'file-saver'
+import EditWizard from "../editwizard/EditWizard";
 
 
 const headCells = [

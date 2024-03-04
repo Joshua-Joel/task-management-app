@@ -128,6 +128,54 @@ router.get("/tasks", authenticateToken((role = "")), async (req, res) => {
   }
 });
 
+router.get("/waiting-tasks", authenticateToken((role = "manager")), async (req, res) => {
+  console.log("requested tasks");
+  try {
+    const user_id = req.user.user_id;
+    if (req.user.role === "manager") {
+      var tasks = await Task.find(
+        { assigner_id: user_id,status:"W" },
+        { assigner_id: 0, __v: 0 }
+      );
+      modTasks = [];
+      for (var i = 0; i < tasks.length; i++) {
+        var user = await User.find(
+          { _id: tasks[i].assignee_id },
+          { user_name: 1,user_email:1, _id: 0 }
+        );
+        console.log("user_name: " + user);
+        let {
+          _id,
+          assignee_id,
+          task_name,
+          task_desc,
+          dead_line,
+          effort,
+          status,
+          created_at,
+        } = tasks[i];
+        console.log()
+        modTasks.push({
+          _id,
+          assignee_id,
+          assignee_name: Object.values(user)[0].user_name,
+          assignee_email: Object.values(user)[0].user_email,
+          task_name,
+          task_desc,
+          dead_line,
+          effort,
+          status,
+          created_at,
+        });
+      }
+    } 
+    console.log(modTasks)
+    res.status(200).json(modTasks);
+  } catch(error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 router.delete(
   "/delete-task",
   authenticateToken((role = "manager")),
