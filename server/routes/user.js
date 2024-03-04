@@ -38,7 +38,7 @@ router.post("/register", async (req, res) => {
 
 router.get("/logout",(req,res)=>{
   res.cookie('token', '', { expires: new Date(0) });
-  res.redirect('/');
+  res.json({ redirect: '/login' });
 })
 
 module.exports = router;
