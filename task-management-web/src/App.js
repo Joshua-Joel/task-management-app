@@ -7,6 +7,7 @@ import { ManagerHome } from './pages/ManagerHome';
 import { ViewAllTasks } from './pages/ViewAllTasks';
 import { ViewMyTask } from './pages/ViewMyTask';
 import { EmployeeHome } from './pages/EmployeeHome';
+import { RequestApproval } from './pages/RequestApproval';
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
         <Route path="/employee-home" element={<EmployeeHome />}></Route>
         <Route path="/view-all-tasks" element={<ViewAllTasks />}></Route>
         <Route path="/view-my-tasks" element={<ViewMyTask/>}></Route>
+        <Route path="/approve-requests" element={<RequestApproval/>}></Route>
       </Routes>
     </BrowserRouter> 
   );

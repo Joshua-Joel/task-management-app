@@ -117,6 +117,9 @@ function ManagerNavBar() {
                 <MenuItem >
                   <Typography textAlign="center">View tasks</Typography>
                 </MenuItem>
+                <MenuItem >
+                  <Typography textAlign="center">Approve Requests</Typography>
+                </MenuItem>
             </Menu>
           </Box>
           <AdbIcon sx={{ display: { xs: 'flex', md: 'none' }, mr: 1 }} />
@@ -145,6 +148,15 @@ function ManagerNavBar() {
                 sx={{ my: 2, color: 'white', display: 'block' }}
               >
                 View tasks
+              </Button>
+          </Box>
+          <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
+              <TaskWizard></TaskWizard>
+              <Button
+                onClick={()=>navigate("/approve-requests")}
+                sx={{ my: 2, color: 'white', display: 'block' }}
+              >
+                Approve Requests
               </Button>
           </Box>
 

@@ -9,12 +9,16 @@ import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TablePagination from "@mui/material/TablePagination";
 import TableRow from "@mui/material/TableRow";
+import TableSortLabel from "@mui/material/TableSortLabel";
 import Toolbar from "@mui/material/Toolbar";
 import Paper from "@mui/material/Paper";
+import DeleteIcon from "@mui/icons-material/Delete";
+import { visuallyHidden } from "@mui/utils";
 import { Button, Typography } from "@mui/material";
-import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
-import AutorenewIcon from "@mui/icons-material/Autorenew";
-import ReportProblemIcon from "@mui/icons-material/ReportProblem";
+import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
+import AutorenewIcon from '@mui/icons-material/Autorenew';
+import ReportProblemIcon from '@mui/icons-material/ReportProblem';
+import EditWizard from "../EditWizard/EditWizard";
 
 
 const headCells = [
@@ -31,16 +35,16 @@ const headCells = [
     label: "Description",
   },
   {
-    id: "Assigner",
+    id: "Employee",
     numeric: false,
     disablePadding: false,
-    label: "Assigner",
+    label: "Employee",
   },
   {
-    id: "Assigner id",
+    id: "Employee id",
     numeric: false,
     disablePadding: false,
-    label: "Assigner id",
+    label: "Employee id",
   },
   {
     id: "Created on",
@@ -74,10 +78,11 @@ const headCells = [
   },
 ];
 
-function EnhancedTableHead(props) {
-  
-  
-
+function TasksTable(props) {
+  const { order, orderBy, onRequestSort } = props;
+  const createSortHandler = (property) => (event) => {
+    onRequestSort(event, property);
+  };
 
   return (
     <TableHead>
@@ -88,8 +93,20 @@ function EnhancedTableHead(props) {
             key={headCell.id}
             align={headCell.numeric ? "right" : "left"}
             padding={headCell.disablePadding ? "none" : "normal"}
+            sortDirection={orderBy === headCell.id ? order : false}
           >
-            {headCell.label}
+            <TableSortLabel
+              active={orderBy === headCell.id}
+              direction={orderBy === headCell.id ? order : "asc"}
+              onClick={createSortHandler(headCell.id)}
+            >
+              {headCell.label}
+              {orderBy === headCell.id ? (
+                <Box component="span" sx={visuallyHidden}>
+                  {order === "desc" ? "sorted descending" : "sorted ascending"}
+                </Box>
+              ) : null}
+            </TableSortLabel>
           </TableCell>
         ))}
       </TableRow>
@@ -97,7 +114,7 @@ function EnhancedTableHead(props) {
   );
 }
 
-EnhancedTableHead.propTypes = {
+TasksTable.propTypes = {
   numSelected: PropTypes.number.isRequired,
   onRequestSort: PropTypes.func.isRequired,
   onSelectAllClick: PropTypes.func.isRequired,
@@ -129,7 +146,7 @@ function EnhancedTableToolbar(props) {
         id="tableTitle"
         component="div"
       >
-        My tasks
+        All tasks
       </Typography>
     </Toolbar>
   );
@@ -139,29 +156,25 @@ EnhancedTableToolbar.propTypes = {
   numSelected: PropTypes.number.isRequired,
 };
 
-export default function EnhancedTable() {
+export default function ApprovalTable() {
   const [data, setData] = useState([]);
   const formatDate = (inputDate) => {
     const date = new Date(inputDate);
+
+    // Extracting day, month, and year
     const day = date.getDate().toString().padStart(2, "0");
-    const month = (date.getMonth() + 1).toString().padStart(2, "0");
+    const month = (date.getMonth() + 1).toString().padStart(2, "0"); // Months are zero-based
     const year = date.getFullYear();
+
+    // Creating the formatted date string
     const formattedDate = `${day}-${month}-${year}`;
 
     return formattedDate;
   };
-
-  function sortByStatus(a,b)  {
-        if(a.status === 'P' )
-        return -1;
-        if(a.status === 'C' )
-        return 1;
-      // return 0;
-  }
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch("http://localhost:3000/api/task/tasks", {
+        const response = await fetch("http://localhost:3000/api/task/waiting-tasks", {
           method: "GET",
           credentials: "include",
           headers: {
@@ -171,24 +184,19 @@ export default function EnhancedTable() {
         });
 
         const result = await response.json();
-        
-        result.sort(sortByStatus);
         setData(result);
-        
       } catch (error) {
         console.error("Error fetching data:", error);
       }
     };
 
     fetchData();
-  },[]);
+  }, []);
   const [order, setOrder] = React.useState("asc");
   const [orderBy, setOrderBy] = React.useState("calories");
   const [selected, setSelected] = React.useState([]);
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
-
-  
 
   const handleRequestSort = (event, property) => {
     const isAsc = orderBy === property && order === "asc";
@@ -196,32 +204,30 @@ export default function EnhancedTable() {
     setOrderBy(property);
   };
 
-  const handleComplete = async (task_id, index) => {
-    
-    try {
-      const response = await fetch(
-        `http://localhost:3000/api/task/request-approval?task_id=${task_id}`,
-        {
-          method: "PATCH",
-          credentials: "include",
-          headers: {
-            "Content-Type": "application/json",
-            Accept: "application/json",
-          },
+  const handleDelete = async (task_id,index) => {
+    try{
+        const response = await fetch(`http://localhost:3000/api/task/delete-task?task_id=${task_id}`,{
+            method: "DELETE",
+            credentials: "include",
+            headers: {
+              "Content-Type": "application/json",
+              Accept: "application/json",
+            }
+        })
+        if(response.ok){
+            const result = await response.json();
+            console.log(result);
+            const newData = [...data];
+            newData.splice(index, 1);
+
+            // Updating the state with the new array
+            setData(newData);
         }
-      );
-      if (response.ok) {
-        const updatedData = [...data];
-        updatedData[index].status = "W"; 
-        
-        setData(updatedData);
-        console.log(data);
-      }
-    } catch (err) {
-      console.log(err);
     }
-  };
-  
+    catch(err){
+        console.log(err);
+    }
+  }
 
   const handleSelectAllClick = (event) => {
     if (event.target.checked) {
@@ -238,7 +244,6 @@ export default function EnhancedTable() {
 
   const handleChangeRowsPerPage = (event) => {
     setRowsPerPage(parseInt(event.target.value, 10));
-    console.log("Current Page:", rowsPerPage);
     setPage(0);
   };
 
@@ -246,26 +251,8 @@ export default function EnhancedTable() {
   const emptyRows =
     page > 0 ? Math.max(0, (1 + page) * rowsPerPage - data.length) : 0;
 
-    const visibleRows = React.useMemo(
-      () =>
-        [...data].slice(
-          page * rowsPerPage,
-          page * rowsPerPage + rowsPerPage,
-        ),
-      [data, page, rowsPerPage],
-    );
-
-    
-
-    
-    
-
   return (
-
-    
-    
     <Box sx={{ width: "100%" }}>
-     
       <Paper sx={{ width: "100%", mb: 2 }}>
         <EnhancedTableToolbar numSelected={selected.length} />
         <TableContainer>
@@ -274,7 +261,7 @@ export default function EnhancedTable() {
             aria-labelledby="tableTitle"
             size={"medium"}
           >
-            <EnhancedTableHead
+            <TasksTable
               numSelected={selected.length}
               order={order}
               orderBy={orderBy}
@@ -283,7 +270,7 @@ export default function EnhancedTable() {
               rowCount={data.length}
             />
             <TableBody>
-              {visibleRows.map((row, index) => {
+              {data.map((row, index) => {
                 const isItemSelected = isSelected(index);
                 const labelId = `enhanced-table-checkbox-${index}`;
 
@@ -308,8 +295,8 @@ export default function EnhancedTable() {
                     </TableCell>
                     <TableCell align="left">{row.task_name}</TableCell>
                     <TableCell align="left">{row.task_desc}</TableCell>
-                    <TableCell align="left">{row.assigner_name}</TableCell>
-                    <TableCell align="left">{row.assigner_id}</TableCell>
+                    <TableCell align="left">{row.assignee_name}</TableCell>
+                    <TableCell align="left">{row.assignee_id}</TableCell>
                     <TableCell align="left">
                       {formatDate(row.created_at)}
                     </TableCell>
@@ -317,46 +304,16 @@ export default function EnhancedTable() {
                       {formatDate(row.dead_line)}
                     </TableCell>
                     <TableCell align="right">{row.effort}</TableCell>
-                    <TableCell align="left">
-                      {row.status === "C" ? (
-                        <CheckCircleOutlineIcon style={{ color: "green" }} />
-                      ) : row.status === "P" ? (
-                        <AutorenewIcon style={{ color: "yellow" }} />
-                      ) : (
-                        <ReportProblemIcon style={{ color: "red" }} />
-                      )}
-                    </TableCell>
+                    <TableCell align="left">{row.status==="C"?<CheckCircleOutlineIcon style={{color:"green"}}/>:row.status==="P"?<AutorenewIcon style={{color:"yellow"}}/>:<ReportProblemIcon style={{color:"red"}}/>}</TableCell>
                     <TableCell align="left">
                       <div style={{ display: "flex", flexDirection: "row" }}>
-                      {
-
-                       
-                        row.status === 'P'?
-                        <Button
-                        variant="contained"
-                        onClick={() => handleComplete(row._id, index)}
-                      >
-                        Complete
-                      </Button>
-                      :
-                      row.status === 'C'?
-                      <Button
-                          variant="contained"
-                          disabled="true"
-                        >
-                          Completed
-                        </Button>
-                        :
-                        <Button
-                          variant="contained"
-                          disabled="true"
-                        >
-                          Pending
-                        </Button>
-                  
-                      
-                      }
+                        <EditWizard values={row}/>
+                        <Button onClick={()=>handleDelete(row._id,index)}>
                         
+                          <DeleteIcon
+                            style={{ color: "red", padding: "4px" }}
+                          />
+                        </Button>
                       </div>
                     </TableCell>
                   </TableRow>
@@ -387,6 +344,3 @@ export default function EnhancedTable() {
     </Box>
   );
 }
-
-
-
