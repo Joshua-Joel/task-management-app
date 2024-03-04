@@ -149,16 +149,13 @@ function ManagerNavBar() {
               >
                 View tasks
               </Button>
-          </Box>
-          <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
-              <TaskWizard></TaskWizard>
               <Button
                 onClick={()=>navigate("/approve-requests")}
                 sx={{ my: 2, color: 'white', display: 'block' }}
               >
                 Approve Requests
               </Button>
-          </Box>
+          </Box>  
 
           <Box sx={{ flexGrow: 0 }}>
             <Tooltip title="Open settings">

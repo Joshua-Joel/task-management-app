@@ -252,7 +252,7 @@ export default function EnhancedTable() {
           page * rowsPerPage,
           page * rowsPerPage + rowsPerPage,
         ),
-      [data, page, rowsPerPage],
+      [page, rowsPerPage,data],
     );
 
     

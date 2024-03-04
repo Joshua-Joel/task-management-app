@@ -1,6 +1,7 @@
 import React from "react";
 import ManagerNavBar from "../components/common/navbar/ManagerNavBar";
 import AllTasksTable from "../components/Manager/taskstable/TasksTable";
+import ApprovalTable from "../components/Manager/requestapproval/ApprovalTable";
 
 export const RequestApproval = () => {
   return (
