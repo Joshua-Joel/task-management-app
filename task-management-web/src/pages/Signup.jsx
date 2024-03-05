@@ -3,24 +3,33 @@ import Box from "@mui/material/Box";
 import TextField from "@mui/material/TextField";
 import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
 import CheckIcon from "@mui/icons-material/Check";
-import { Alert, Button, InputLabel, Link, MenuItem, Select } from "@mui/material";
+import {
+  Alert,
+  Button,
+  InputLabel,
+  Link,
+  MenuItem,
+  Select,
+} from "@mui/material";
 import { FormControl } from "@mui/material";
 // import { useNavigate } from "react-router-dom";
 
 export const Signup = () => {
   const [formData, setFormData] = useState({
-    user_name:"",
+    user_name: "",
     user_email: "",
     password: "",
-    role: ""
+    role: "",
   });
-  const [emailValidationError,setEmailValidationError] = useState(false);
-  const [emailError,setEmailError] = useState(false);
-  const [passwordError,setPasswordError] = useState(false);
+  const [emailValidationError, setEmailValidationError] = useState(false);
+  const [passwordError, setPasswordError] = useState(false);
   const [signupSuccess, setSignupSuccess] = useState(false);
   const [conflictStatus, setConflictStatus] = useState(false);
   // const [isValid,setIsValid] = useState(false);
   // const navigate = useNavigate();
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
+
   const handleInputChange = (e) => {
     setConflictStatus(false);
     const { name, value } = e.target;
@@ -30,36 +39,52 @@ export const Signup = () => {
     });
     console.log(formData);
   };
-  const handleSignup = async (e) => {
-    try {
-      e.preventDefault();
-      // if (formData) {
-      //   setIsValid(true);
-      // }
-      const response = await fetch("http://localhost:3000/api/user/register",{
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData)
-      })
 
-      const res = await response.json();
-      if(res.message === "success"){
-        setSignupSuccess(true);
-      }
-      if(res.message === "User already exists"){
-        setConflictStatus(true);
-      }
-      setFormData({
-        user_name:"",
-        user_email: "",
-        password: "",
-        role: "",
-      });
-    } catch (error) {
-      if (error.response.status === 400) {
-        setConflictStatus(true);
+  const handleSignup = async (e) => {
+    const isValidEmail = emailRegex.test(formData.user_email);
+    const isValidPassword = passwordRegex.test(formData.password);
+    if (!isValidEmail) {
+      setEmailValidationError(true);
+    } 
+    else if (!isValidPassword) {
+      setEmailValidationError(false);
+      setPasswordError(true);
+    } else {
+      try {
+        e.preventDefault();
+        // if (formData) {
+        //   setIsValid(true);
+        // }
+        const response = await fetch(
+          "http://localhost:3000/api/user/register",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(formData),
+          }
+        );
+
+        const res = await response.json();
+        if (res.message === "success") {
+          setSignupSuccess(true);
+        }
+        if (res.message === "User already exists") {
+          setConflictStatus(true);
+        }
+        setFormData({
+          user_name: "",
+          user_email: "",
+          password: "",
+          role: "",
+        });
+        setPasswordError(false);
+        setEmailValidationError(false);
+      } catch (error) {
+        if (error.response.status === 400) {
+          setConflictStatus(true);
+        }
       }
     }
   };
@@ -117,6 +142,7 @@ export const Signup = () => {
               onChange={handleInputChange}
               required
             />
+
             <TextField
               style={{ margin: " 10px 0 10px 0" }}
               id="text-field-2"
@@ -127,6 +153,14 @@ export const Signup = () => {
               onChange={handleInputChange}
               required
             />
+            {emailValidationError && (
+              <Alert
+                icon={<ErrorOutlineIcon fontSize="inherit" />}
+                severity="error"
+              >
+                Invalid Email
+              </Alert>
+            )}
             <TextField
               style={{ margin: "10px 0 10px 0" }}
               id="password-field-1"
@@ -138,9 +172,17 @@ export const Signup = () => {
               onChange={handleInputChange}
               required
             />
+            {passwordError && (
+              <Alert
+                icon={<ErrorOutlineIcon fontSize="inherit" />}
+                severity="error"
+              >
+                Invalid Password
+              </Alert>
+            )}
             <FormControl fullWidth style={{ margin: "10px 0" }}>
               <InputLabel id="role">Role</InputLabel>
-              <Select 
+              <Select
                 required
                 labelId="role"
                 value={formData.role}
@@ -193,7 +235,7 @@ export const Signup = () => {
             >
               Login
             </Button> */}
-          <Link href="/login" underline="hover">
+            <Link href="/login" underline="hover">
               Login
             </Link>
           </FormControl>

@@ -14,7 +14,7 @@ import Toolbar from "@mui/material/Toolbar";
 import Paper from "@mui/material/Paper";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { visuallyHidden } from "@mui/utils";
-import { Button, Typography ,InputLabel} from "@mui/material";
+import { Button,InputLabel, Typography } from "@mui/material";
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import AutorenewIcon from '@mui/icons-material/Autorenew';
 import ReportProblemIcon from '@mui/icons-material/ReportProblem';
@@ -131,7 +131,7 @@ TasksTable.propTypes = {
 };
 
 function EnhancedTableToolbar(props) {
-  const statusList = ["Completed", "Pending"];
+
   const [isStatus,setIsStatus]=useState('')
   const { numSelected } = props;
   const [type, setType] = useState("");
@@ -214,8 +214,8 @@ function EnhancedTableToolbar(props) {
             <MenuItem value="Status">Status</MenuItem>
           </Select>
         </FormControl>
-        {isStatus==''?<></>:
-         isStatus=="Status"?(
+        {isStatus===''?<></>:
+         isStatus==="Status"?(
           <>
           <FormControl
           sx={{ m: 1, width: "15ch", height: '10px'}}
@@ -470,9 +470,9 @@ export default function AllTasksTable() {
                 if(Filttype==''){
                   return item;
                 }
-                if(Filttype=='Status'){
-                  return item.status==state;
-                }else if(Filttype=='Deadline'){
+                if(Filttype==='Status'){
+                  return item.status===state;
+                }else if(Filttype==='Deadline'){
                   const userDeadline = new Date(item.dead_line);
                   return userDeadline >= new Date(fromDate) && userDeadline<= new Date(toDate);
                 }else{
