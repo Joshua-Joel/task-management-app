@@ -14,13 +14,12 @@ import Toolbar from "@mui/material/Toolbar";
 import Paper from "@mui/material/Paper";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { visuallyHidden } from "@mui/utils";
-import { Button, InputLabel , Typography } from "@mui/material";
+import { Button,InputLabel, InputLabel , Typography } from "@mui/material";
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import AutorenewIcon from '@mui/icons-material/Autorenew';
 import ReportProblemIcon from '@mui/icons-material/ReportProblem';
 import EditWizard from "../EditWizard/EditWizard";
 import { saveAs } from 'file-saver';
-import { ButtonGroup } from "@mui/material";
 import MenuItem from "@mui/material/MenuItem";
 import Select from "@mui/material/Select";
 import FormControl from "@mui/material/FormControl";
@@ -146,7 +145,7 @@ TasksTable.propTypes = {
 };
 
 function EnhancedTableToolbar(props) {
-  const statusList = ["Completed", "Pending"];
+
   const [isStatus,setIsStatus]=useState('')
   const { numSelected } = props;
   const [type, setType] = useState("");
@@ -178,6 +177,12 @@ function EnhancedTableToolbar(props) {
       type,
       value: state
     });
+  }
+
+  const handleClearFilter=()=>{
+    props.reset();
+    setIsStatus('');
+    setType('');
   }
 
   return (
@@ -223,8 +228,8 @@ function EnhancedTableToolbar(props) {
             <MenuItem value="Status">Status</MenuItem>
           </Select>
         </FormControl>
-        {isStatus==''?<></>:
-         isStatus=="Status"?(
+        {isStatus===''?<></>:
+         isStatus==="Status"?(
           <>
           <FormControl
           sx={{ m: 1, width: "15ch", height: '10px'}}
@@ -241,10 +246,14 @@ function EnhancedTableToolbar(props) {
           >
             <MenuItem value="P">Pending</MenuItem>
             <MenuItem value="C">Completed</MenuItem>
+            <MenuItem value="O">Overdue</MenuItem>
+            <MenuItem value="W">Waiting For Approval</MenuItem>
           </Select>
                 
         </FormControl>
         <Button variant="contained" sx={{marginTop:"10px", marginLeft:"15px"}} onClick={handleStatusFilter}>Apply</Button>
+        
+        <Button variant="contained" sx={{marginTop:"10px", marginLeft:"15px"}} onClick={handleClearFilter}>Clear Filter</Button>
         </>
         ):(
           <>
@@ -272,6 +281,8 @@ function EnhancedTableToolbar(props) {
                 onChange={(e)=>{setToDate(e.target.value)}}
               />
         <Button variant="contained" sx={{marginTop:"15px", marginLeft:"15px"}} onClick={handleDateFilter}>Apply</Button>      
+        
+        <Button variant="contained" sx={{marginTop:"10px", marginLeft:"15px"}} onClick={handleClearFilter}>Clear Filter</Button>
         </>
         )}
         </div>
@@ -379,6 +390,39 @@ export default function AllTasksTable() {
 
     return formattedDate;
   };
+
+  function sortByStatus(a,b)  {
+    if(a.status === 'P' ||  a.status === 'W')
+    return -1;
+    // if(a.status == 'W')
+    // return 0;
+    if(a.status === 'C' )
+    return 1;
+  // return 0;
+}
+
+
+    const [Filttype, setType] = useState("");
+  const [state,setStatus]=useState("");
+  const [fromDate,setFromDate]=useState(new Date());
+  const [toDate,setToDate]=useState(new Date());
+
+  const handleFilter=(data)=>{
+    setType(data.type);
+    console.log(data);
+    if(Filttype=='Status'){
+      setStatus(data.value);
+    }else{
+      setFromDate(data.from)
+      setToDate(data.to)
+    }
+  }
+
+  const handleReset=()=>{
+      setType('')
+      console.log("Reset");
+  }
+
   const transformedData = data.map((item) => ({
     name: item.task_name,
     formatted_deadline: formatDate(item.dead_line),
@@ -398,6 +442,7 @@ export default function AllTasksTable() {
         });
 
         const result = await response.json();
+        result.sort(sortByStatus);
         setData(result);
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -405,7 +450,7 @@ export default function AllTasksTable() {
     };
 
     fetchData();
-  }, []);
+  }, [Filttype]);
   const [order, setOrder] = React.useState("asc");
   const [orderBy, setOrderBy] = React.useState("calories");
   const [selected, setSelected] = React.useState([]);
@@ -464,21 +509,7 @@ export default function AllTasksTable() {
   };
 
   
-  const [Filttype, setType] = useState("");
-  const [state,setStatus]=useState("");
-  const [fromDate,setFromDate]=useState(new Date());
-  const [toDate,setToDate]=useState(new Date());
 
-  const handleFilter=(data)=>{
-    setType(data.type);
-    console.log(data);
-    if(Filttype=='Status'){
-      setStatus(data.value);
-    }else{
-      setFromDate(data.from)
-      setToDate(data.to)
-    }
-  }
 
   const isSelected = (id) => selected.indexOf(id) !== -1;
   const emptyRows =
@@ -518,7 +549,7 @@ export default function AllTasksTable() {
   return (
     <Box sx={{ width: "100%" }}>
       <Paper sx={{ width: "100%", mb: 2 }}>
-        <EnhancedTableToolbar numSelected={selected.length} sendFilter={handleFilter}/>
+        <EnhancedTableToolbar numSelected={selected.length} reset={handleReset} sendFilter={handleFilter}/>
         <Button sx={{left:"90%"}} onClick={exportToCSV}>Export to CSV</Button>
         <TableContainer>
           <Table
@@ -536,9 +567,12 @@ export default function AllTasksTable() {
             />
             <TableBody>
               {data.filter((item)=>{
-                if(Filttype=='Status'){
-                  return item.status==state;
-                }else if(Filttype=='Deadline'){
+                if(Filttype==''){
+                  return item;
+                }
+                if(Filttype==='Status'){
+                  return item.status===state;
+                }else if(Filttype==='Deadline'){
                   const userDeadline = new Date(item.dead_line);
                   return userDeadline >= new Date(fromDate) && userDeadline<= new Date(toDate);
                 }else{
@@ -547,7 +581,6 @@ export default function AllTasksTable() {
               }).map((row, index) => {
                 const isItemSelected = isSelected(index);
                 const labelId = `enhanced-table-checkbox-${index}`;
-
                 return (
                   <TableRow
                     hover

@@ -258,8 +258,10 @@ export default function EnhancedTable() {
   })).sort((a, b) => a.deadline - b.deadline);
 
   function sortByStatus(a,b)  {
-        if(a.status === 'P' )
+        if(a.status === 'P' ||  a.status === 'W')
         return -1;
+        // if(a.status == 'W')
+        // return 0;
         if(a.status === 'C' )
         return 1;
       // return 0;

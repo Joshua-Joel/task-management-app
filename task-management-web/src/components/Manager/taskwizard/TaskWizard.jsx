@@ -1,11 +1,15 @@
 import * as React from "react";
 import Button from "@mui/material/Button";
 import Dialog from "@mui/material/Dialog";
+import  {Alert}  from "@mui/material";
+import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
 
 import { Box, FormControl, TextField } from "@mui/material";
 
 export default function TaskWizard() {
   const [open, setOpen] = React.useState(false);
+  const [emailError,setEmailError] = React.useState(false);
+  const [effortError,setEffortError] = React.useState(false);
   const [taskData, setTaskData] = React.useState({
     assignee_email: "",
     task_name: "",
@@ -13,6 +17,8 @@ export default function TaskWizard() {
     dead_line: "",
     effort: "",
   });
+
+ 
   const handleClickOpen = () => {
     setOpen(true);
   };
@@ -24,28 +30,76 @@ export default function TaskWizard() {
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setTaskData({ ...taskData, [name]: value });
+    
   };
 
-  const handleAssign = async () =>{
+  const handleAssign = async () => {
     console.log(taskData);
-    try{
-      const response = await fetch("http://localhost:3000/api/task/assign-task",{
-        method: "POST",
-        redirect: "follow",
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(taskData)
-      })
-      const res = await response.json();
-      console.log(res);
-      setOpen(false); 
+    if(taskData.effort > days)
+    {
+      setEffortError(true);
     }
-    catch(err){
+    else{
+    try {
+      const response = await fetch(
+        "http://localhost:3000/api/task/assign-task",
+        {
+          method: "POST",
+          redirect: "follow",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(taskData),
+        }
+      );
+      const res = await response.json();
+      if(res.message === "employee not found..!")
+      {
+        setEmailError(true);
+      }
+      else
+    {
+      console.log(res);
+      setOpen(false);
+      setEffortError(false);
+    }
+    } catch (err) {
       console.log(err);
     }
+  
   }
+
+  
+  };
+
+  const today = new Date();
+  function formatDateToYYYYMMDD(date) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+  
+    return `${year}-${month}-${day}`;
+  }
+  const formattedDate = formatDateToYYYYMMDD(today);
+
+  const calculateDaysBetweenDates = (startDate, endDate) => {
+    const oneDay = 24 * 60 * 60 * 1000; // hours * minutes * seconds * milliseconds
+
+    const startDateTime = new Date(startDate);
+    const endDateTime = new Date(endDate);
+
+    // Calculate the difference in milliseconds
+    const timeDifference = Math.abs(endDateTime - startDateTime);
+
+    // Calculate the number of days
+    const numberOfDays = Math.round(timeDifference / oneDay);
+
+    return numberOfDays;
+  };
+
+  const days = calculateDaysBetweenDates(formattedDate,taskData.dead_line);
+  console.log(days)
   return (
     <React.Fragment>
       <Button
@@ -100,14 +154,24 @@ export default function TaskWizard() {
                 name="assignee_email"
                 label="Assignee email"
                 variant="outlined"
+                required="true"
                 value={taskData.assignee_email}
                 onChange={handleInputChange}
               />
+              {emailError && (
+              <Alert
+                icon={<ErrorOutlineIcon fontSize="inherit" />}
+                severity="error"
+              >
+               Employee Not Found..!
+              </Alert>
+            )}
               <TextField
                 style={{ margin: " 10px 0 10px 0" }}
                 name="task_name"
                 label="Task name"
                 variant="outlined"
+                required="true"
                 value={taskData.task_name}
                 onChange={handleInputChange}
               />
@@ -118,6 +182,7 @@ export default function TaskWizard() {
                 multiline
                 maxRows={4}
                 name="task_desc"
+                required="true"
                 value={taskData.task_desc}
                 onChange={handleInputChange}
               />
@@ -125,10 +190,15 @@ export default function TaskWizard() {
                 style={{ margin: " 10px 0 10px 0" }}
                 label="Dead line"
                 type="date"
+                inputProps={{
+                  min:  formattedDate,
+                }}
+                
                 InputLabelProps={{
                   shrink: true,
                 }}
                 name="dead_line"
+                required="true"
                 value={taskData.dead_line}
                 onChange={handleInputChange}
               />
@@ -138,13 +208,29 @@ export default function TaskWizard() {
                 name="effort"
                 label="Effort"
                 variant="outlined"
-                
+                required="true"
+        
                 value={taskData.effort}
                 onChange={handleInputChange}
               />
-              <Button style={{ margin: "20px 0" }} variant="contained" onClick={handleAssign}>
+              {effortError && (
+              <Alert
+                icon={<ErrorOutlineIcon fontSize="inherit" />}
+                severity="error"
+              >
+               Effort can't exceed Deadline
+              </Alert>
+            )}
+              <Button
+                style={{ margin: "20px 0" }}
+                variant="contained"
+                onClick={handleAssign}
+                
+                disabled = {!(taskData.assignee_email && taskData.task_name && taskData.task_desc && taskData.dead_line && taskData.effort)}
+              >
                 Assign
               </Button>
+            
             </FormControl>
           </div>
         </Box>
