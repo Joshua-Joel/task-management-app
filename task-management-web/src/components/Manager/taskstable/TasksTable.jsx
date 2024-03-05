@@ -85,7 +85,7 @@ const headCells = [
     id: "Status",
     numeric: false,
     disablePadding: false,
-    label: "status",
+    label: "Status",
   },
   {
     id: "Action",
