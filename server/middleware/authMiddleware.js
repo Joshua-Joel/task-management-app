@@ -20,7 +20,6 @@ const jwt = require("jsonwebtoken");
 //   });
 // }
 const authenticateToken = (role) => {
-    console.log("middle");
   return async (req, res, next) => {
     
     const token = req.cookies.token;
