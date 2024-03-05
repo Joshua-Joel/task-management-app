@@ -34,6 +34,7 @@ export default function TaskWizard() {
   };
 
   const handleAssign = async () => {
+    const days = calculateDaysBetweenDates(formattedDate,taskData.dead_line);
     console.log(taskData);
     if(taskData.effort > days || taskData.effort <= 0)
     {
@@ -98,8 +99,6 @@ export default function TaskWizard() {
     return numberOfDays;
   };
 
-  const days = calculateDaysBetweenDates(formattedDate,taskData.dead_line);
-  console.log(days)
   return (
     <React.Fragment>
       <Button
