@@ -15,11 +15,10 @@ import Paper from "@mui/material/Paper";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { visuallyHidden } from "@mui/utils";
 import { Button, Typography } from "@mui/material";
-import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
-import AutorenewIcon from '@mui/icons-material/Autorenew';
-import ReportProblemIcon from '@mui/icons-material/ReportProblem';
-import EditWizard from "../editwizard/EditWizard";
-
+import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
+import AutorenewIcon from "@mui/icons-material/Autorenew";
+import ReportProblemIcon from "@mui/icons-material/ReportProblem";
+import EditWizard from "../EditWizard/EditWizard";
 
 const headCells = [
   {
@@ -204,30 +203,32 @@ export default function AllTasksTable() {
     setOrderBy(property);
   };
 
-  const handleDelete = async (task_id,index) => {
-    try{
-        const response = await fetch(`http://localhost:3000/api/task/delete-task?task_id=${task_id}`,{
-            method: "DELETE",
-            credentials: "include",
-            headers: {
-              "Content-Type": "application/json",
-              Accept: "application/json",
-            }
-        })
-        if(response.ok){
-            const result = await response.json();
-            console.log(result);
-            const newData = [...data];
-            newData.splice(index, 1);
-
-            // Updating the state with the new array
-            setData(newData);
+  const handleDelete = async (task_id, index) => {
+    try {
+      const response = await fetch(
+        `http://localhost:3000/api/task/delete-task?task_id=${task_id}`,
+        {
+          method: "DELETE",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
         }
+      );
+      if (response.ok) {
+        const result = await response.json();
+        console.log(result);
+        const newData = [...data];
+        newData.splice(index, 1);
+
+        // Updating the state with the new array
+        setData(newData);
+      }
+    } catch (err) {
+      console.log(err);
     }
-    catch(err){
-        console.log(err);
-    }
-  }
+  };
 
   const handleSelectAllClick = (event) => {
     if (event.target.checked) {
@@ -304,12 +305,19 @@ export default function AllTasksTable() {
                       {formatDate(row.dead_line)}
                     </TableCell>
                     <TableCell align="right">{row.effort}</TableCell>
-                    <TableCell align="left">{row.status==="C"?<CheckCircleOutlineIcon style={{color:"green"}}/>:row.status==="P"?<AutorenewIcon style={{color:"yellow"}}/>:<ReportProblemIcon style={{color:"red"}}/>}</TableCell>
+                    <TableCell align="left">
+                      {row.status === "C" ? (
+                        <CheckCircleOutlineIcon style={{ color: "green" }} />
+                      ) : row.status === "P" ? (
+                        <AutorenewIcon style={{ color: "yellow" }} />
+                      ) : (
+                        <ReportProblemIcon style={{ color: "red" }} />
+                      )}
+                    </TableCell>
                     <TableCell align="left">
                       <div style={{ display: "flex", flexDirection: "row" }}>
-                        <EditWizard values={row}/>
-                        <Button onClick={()=>handleDelete(row._id,index)}>
-                        
+                        <EditWizard values={row} />
+                        <Button onClick={() => handleDelete(row._id, index)}>
                           <DeleteIcon
                             style={{ color: "red", padding: "4px" }}
                           />
