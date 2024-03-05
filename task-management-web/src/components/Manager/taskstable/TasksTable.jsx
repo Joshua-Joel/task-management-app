@@ -14,10 +14,10 @@ import Toolbar from "@mui/material/Toolbar";
 import Paper from "@mui/material/Paper";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { visuallyHidden } from "@mui/utils";
-import { Button, InputLabel, Typography } from "@mui/material";
-import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
-import AutorenewIcon from "@mui/icons-material/Autorenew";
-import ReportProblemIcon from "@mui/icons-material/ReportProblem";
+import { Button, Typography } from "@mui/material";
+import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
+import AutorenewIcon from '@mui/icons-material/Autorenew';
+import ReportProblemIcon from '@mui/icons-material/ReportProblem';
 import EditWizard from "../EditWizard/EditWizard";
 import { saveAs } from 'file-saver';
 import { ButtonGroup } from "@mui/material";
@@ -299,6 +299,17 @@ export default function AllTasksTable() {
     return formattedDate;
   };
 
+  function sortByStatus(a,b)  {
+    if(a.status === 'P' ||  a.status === 'W')
+    return -1;
+    // if(a.status == 'W')
+    // return 0;
+    if(a.status === 'C' )
+    return 1;
+  // return 0;
+}
+
+
     const [Filttype, setType] = useState("");
   const [state,setStatus]=useState("");
   const [fromDate,setFromDate]=useState(new Date());
@@ -333,6 +344,7 @@ export default function AllTasksTable() {
         });
 
         const result = await response.json();
+        result.sort(sortByStatus);
         setData(result);
       } catch (error) {
         console.error("Error fetching data:", error);

@@ -14,6 +14,9 @@ export const Signup = () => {
     password: "",
     role: ""
   });
+  const [emailValidationError,setEmailValidationError] = useState(false);
+  const [emailError,setEmailError] = useState(false);
+  const [passwordError,setPasswordError] = useState(false);
   const [signupSuccess, setSignupSuccess] = useState(false);
   const [conflictStatus, setConflictStatus] = useState(false);
   // const [isValid,setIsValid] = useState(false);
