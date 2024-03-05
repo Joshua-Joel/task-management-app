@@ -18,7 +18,7 @@ import { Button, Typography } from "@mui/material";
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import AutorenewIcon from '@mui/icons-material/Autorenew';
 import ReportProblemIcon from '@mui/icons-material/ReportProblem';
-import EditWizard from "../editwizard/EditWizard";
+import EditWizard from "../EditWizard/EditWizard";
 import { saveAs } from 'file-saver';
 
 
@@ -172,6 +172,17 @@ export default function AllTasksTable() {
 
     return formattedDate;
   };
+
+  function sortByStatus(a,b)  {
+    if(a.status === 'P' ||  a.status === 'W')
+    return -1;
+    // if(a.status == 'W')
+    // return 0;
+    if(a.status === 'C' )
+    return 1;
+  // return 0;
+}
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -185,6 +196,7 @@ export default function AllTasksTable() {
         });
 
         const result = await response.json();
+        result.sort(sortByStatus);
         setData(result);
       } catch (error) {
         console.error("Error fetching data:", error);
