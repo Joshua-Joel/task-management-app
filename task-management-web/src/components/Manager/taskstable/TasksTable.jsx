@@ -14,7 +14,7 @@ import Toolbar from "@mui/material/Toolbar";
 import Paper from "@mui/material/Paper";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { visuallyHidden } from "@mui/utils";
-import { Button,InputLabel, Typography } from "@mui/material";
+import { Button,InputLabel, InputLabel , Typography } from "@mui/material";
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import AutorenewIcon from '@mui/icons-material/Autorenew';
 import ReportProblemIcon from '@mui/icons-material/ReportProblem';
@@ -24,6 +24,20 @@ import MenuItem from "@mui/material/MenuItem";
 import Select from "@mui/material/Select";
 import FormControl from "@mui/material/FormControl";
 import TextField from "@mui/material/TextField";
+import {
+  BarChart,
+  Bar,
+  PieChart,
+  Pie,
+  Cell,
+  ScatterChart,
+  Scatter,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+} from "recharts";
 const headCells = [
   {
     id: "Task",
@@ -71,7 +85,7 @@ const headCells = [
     id: "Status",
     numeric: false,
     disablePadding: false,
-    label: "status",
+    label: "Status",
   },
   {
     id: "Action",
@@ -281,6 +295,85 @@ function EnhancedTableToolbar(props) {
 EnhancedTableToolbar.propTypes = {
   numSelected: PropTypes.number.isRequired,
 };
+const MyBarChart = ({ data }) => {
+  const transformedData = data.map((item) => ({
+    name: item.task_name,
+    effort: item.effort,
+  }));
+
+  return (
+    <BarChart width={600} height={300} data={transformedData}>
+      <CartesianGrid strokeDasharray="3 3" />
+      <XAxis />
+      <YAxis />
+      <Tooltip content={<CustomTooltip data={transformedData} />} />
+      <Legend />
+      <Bar dataKey="effort" fill="#8884d8" />
+    </BarChart>
+  );
+};
+
+const CustomTooltip = ({ active, payload, label, data }) => {
+  if (active && payload && payload.length) {
+    const taskName = payload[0]?.payload.name || "";
+    const effort = payload[0]?.payload.effort || "";
+    return (
+      <div className="custom-tooltip">
+        <p className="label">{`Task: ${taskName}`}</p>
+        <p className="label">{`Effort: ${effort}`}</p>
+      </div>
+    );
+  }
+
+  return null;
+};
+const MyPieChart = ({ data }) => {
+  const COLORS = ["#0088FE", "#00C49F", "#FFBB28"];
+  return (
+    <PieChart width={400} height={300}>
+      <Pie
+        data={data}
+        cx={200}
+        cy={150}
+        innerRadius={60}
+        outerRadius={80}
+        fill="#8884d8"
+        paddingAngle={5}
+        label={(entry) => entry.name}
+      >
+        {data.map((entry, index) => (
+          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+        ))}
+      </Pie>
+      <Tooltip />
+      <Legend />
+    </PieChart>
+  );
+};
+const MyScatterChart = ({ data }) => {
+  return (
+    <ScatterChart
+      width={600}
+      height={300}
+      margin={{ top: 20, right: 20, bottom: 10, left: 10 }}
+    >
+      <CartesianGrid strokeDasharray="3 3" />
+      <XAxis dataKey="name" />
+      <YAxis
+        type="category"
+        dataKey="formatted_deadline"
+        name="Deadline"
+        tick={{ fontSize: 12 }}
+      />
+      <Tooltip cursor={{ strokeDasharray: "3 3" }} />
+      <Scatter name="Tasks" data={data} fill="#8884d8">
+        {data.map((entry, index) => (
+          <Cell key={`cell-${index}`} />
+        ))}
+      </Scatter>
+    </ScatterChart>
+  );
+};
 
 export default function AllTasksTable() {
   const [data, setData] = useState([]);
@@ -330,6 +423,12 @@ export default function AllTasksTable() {
       console.log("Reset");
   }
 
+  const transformedData = data.map((item) => ({
+    name: item.task_name,
+    formatted_deadline: formatDate(item.dead_line),
+    deadline: item.dead_line,
+  })).sort((a, b) => a.deadline - b.deadline);
+  
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -451,6 +550,7 @@ export default function AllTasksTable() {
     <Box sx={{ width: "100%" }}>
       <Paper sx={{ width: "100%", mb: 2 }}>
         <EnhancedTableToolbar numSelected={selected.length} reset={handleReset} sendFilter={handleFilter}/>
+        <Button sx={{left:"90%"}} onClick={exportToCSV}>Export to CSV</Button>
         <TableContainer>
           <Table
             sx={{ minWidth: 750 }}
@@ -554,7 +654,24 @@ export default function AllTasksTable() {
           onPageChange={handleChangePage}
           onRowsPerPageChange={handleChangeRowsPerPage}
         />
-        <Button onClick={exportToCSV}>Export to CSV</Button>
+        <Box sx={{ display: "flex", flexDirection: "row", flexWrap: "wrap" , gap: "20%"}}>
+        <Box sx={{ width: "33%", marginRight: "2%" }}>
+          <MyBarChart data={data} />
+        </Box>
+        <Box sx={{ width: "40", marginRight: "2%" }}>
+          <MyPieChart
+            data={[
+              { name: "Complete", value: data.filter((item) => item.status === "C").length },
+              { name: "Pending", value: data.filter((item) => item.status === "P").length },
+              { name: "Approve", value: data.filter((item) => item.status === "A").length },
+            ]}
+          />
+        </Box>
+        {/* <MyScatterChart data={data.map((item) => ({ name: item.task_name, deadline: item.dead_line }))} /> */}
+        <Box sx={{ width: "33%" }}>
+          <MyScatterChart data={transformedData} />
+        </Box>
+        </Box>
       </Paper>
     </Box>
   );
