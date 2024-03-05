@@ -13,6 +13,7 @@ import Tooltip from "@mui/material/Tooltip";
 import MenuItem from "@mui/material/MenuItem";
 import AdbIcon from "@mui/icons-material/Adb";
 import logo from "../../../assets/logo.png";
+import employeelogo from "../../../assets/employeelogo.png";
 import { useNavigate } from "react-router-dom";
 
 function EmployeeNavBar() {
@@ -145,7 +146,7 @@ function EmployeeNavBar() {
           <Box sx={{ flexGrow: 0 }}>
             <Tooltip title="Open settings">
               <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                <Avatar alt="Remy Sharp" src="/static/images/avatar/2.jpg" />
+                <Avatar alt="Remy Sharp" src={employeelogo} />
               </IconButton>
             </Tooltip>
             <Menu

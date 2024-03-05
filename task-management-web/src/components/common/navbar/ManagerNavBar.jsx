@@ -15,6 +15,7 @@ import AdbIcon from "@mui/icons-material/Adb";
 import logo from "../../../assets/logo.png";
 import { useNavigate } from "react-router-dom";
 import TaskWizard from "../../Manager/taskwizard/TaskWizard";
+import managerlogo from "../../../assets/managerlogo.png";
 
 function ManagerNavBar() {
   const navigate = useNavigate();
@@ -158,7 +159,11 @@ function ManagerNavBar() {
           <Box sx={{ flexGrow: 0 }}>
             <Tooltip title="Open settings">
               <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                <Avatar alt="Remy Sharp" src="/static/images/avatar/2.jpg" />
+                <Avatar
+                  alt="Remy Sharp"
+                  src={managerlogo}
+                  style={{ height: "60px", width: "60px" }}
+                />
               </IconButton>
             </Tooltip>
             <Menu
