@@ -14,9 +14,10 @@ import Toolbar from "@mui/material/Toolbar";
 import Paper from "@mui/material/Paper";
 import { visuallyHidden } from "@mui/utils";
 import { Button, Typography } from "@mui/material";
-import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
-import AutorenewIcon from "@mui/icons-material/Autorenew";
-import ReportProblemIcon from "@mui/icons-material/ReportProblem";
+// import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
+// import AutorenewIcon from "@mui/icons-material/Autorenew";
+// import ReportProblemIcon from "@mui/icons-material/ReportProblem";
+import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty';
 
 const headCells = [
   {
@@ -183,10 +184,8 @@ export default function ApprovalTable() {
         }
       );
       if (response.ok) {
-        const updatedData = [...data];
-        updatedData[index].status = "C";
-
-        setData(updatedData);
+        
+        setData(data.splice(index, 1));
         console.log(data);
       }
     } catch (err) {
@@ -306,13 +305,7 @@ export default function ApprovalTable() {
                     </TableCell>
                     <TableCell align="right">{row.effort}</TableCell>
                     <TableCell align="left">
-                      {row.status === "C" ? (
-                        <CheckCircleOutlineIcon style={{ color: "green" }} />
-                      ) : row.status === "P" ? (
-                        <AutorenewIcon style={{ color: "yellow" }} />
-                      ) : (
-                        <ReportProblemIcon style={{ color: "red" }} />
-                      )}
+                      <HourglassEmptyIcon></HourglassEmptyIcon>
                     </TableCell>
                     <TableCell>
                       <Button

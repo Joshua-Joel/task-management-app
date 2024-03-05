@@ -20,7 +20,6 @@ function EmployeeNavBar() {
   const navigate = useNavigate();
   const [anchorElNav, setAnchorElNav] = React.useState(null);
   const [anchorElUser, setAnchorElUser] = React.useState(null);
-
   const handleOpenNavMenu = (event) => {
     //navigate("/login")
     setAnchorElNav(event.currentTarget);
@@ -39,6 +38,7 @@ function EmployeeNavBar() {
 
   const handleLogout = async () => {
     console.log("logout");
+    localStorage.removeItem("user_name");
     try {
       const response = await fetch("http://localhost:3000/api/user/logout", {
         method: "GET",
@@ -143,7 +143,8 @@ function EmployeeNavBar() {
             </Button>
           </Box>
 
-          <Box sx={{ flexGrow: 0 }}>
+          <Box sx={{ flexGrow: 0 ,display:"flex",flexDirection:"row"}}>
+            <Typography style={{padding:"10px"}}>{localStorage.getItem("user_name")}</Typography>
             <Tooltip title="Open settings">
               <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
                 <Avatar alt="Remy Sharp" src={employeelogo} />

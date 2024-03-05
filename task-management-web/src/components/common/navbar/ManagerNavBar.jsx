@@ -39,6 +39,7 @@ function ManagerNavBar() {
   };
   const handleLogout = async () => {
     console.log("logout");
+    localStorage.removeItem("user_name");
     try {
       const response = await fetch("http://localhost:3000/api/user/logout", {
         method: "GET",
@@ -156,7 +157,8 @@ function ManagerNavBar() {
             </Button>
           </Box>
 
-          <Box sx={{ flexGrow: 0 }}>
+          <Box sx={{ flexGrow: 0 ,display:"flex",flexDirection:"row"}}>
+          <Typography style={{padding:"20px 10px"}}>{localStorage.getItem("user_name")}</Typography>
             <Tooltip title="Open settings">
               <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
                 <Avatar

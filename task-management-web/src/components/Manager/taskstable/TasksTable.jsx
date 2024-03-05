@@ -18,7 +18,8 @@ import { Button,InputLabel , Typography } from "@mui/material";
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import AutorenewIcon from '@mui/icons-material/Autorenew';
 import ReportProblemIcon from '@mui/icons-material/ReportProblem';
-import EditWizard from "../EditWizard/EditWizard";
+import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty';
+import EditWizard from "../editwizard/EditWizard";
 import { saveAs } from 'file-saver';
 import html2canvas from 'html2canvas';
 import MenuItem from "@mui/material/MenuItem";
@@ -186,7 +187,6 @@ function EnhancedTableToolbar(props) {
     setIsStatus('');
     setType('');
   }
-
   return (
     <Toolbar
       sx={{
@@ -568,7 +568,7 @@ export default function AllTasksTable() {
     <Box sx={{ width: "100%" }}>
       <Paper sx={{ width: "100%", mb: 2 }}>
         <EnhancedTableToolbar numSelected={selected.length} reset={handleReset} sendFilter={handleFilter}/>
-        <Button sx={{left:"90%"}} onClick={exportToCSV}>Export to CSV</Button>
+        <Button sx={{left:"85%"}} onClick={exportToCSV}>Export to CSV</Button>
         <TableContainer>
           <Table
             sx={{ minWidth: 750 }}
@@ -634,9 +634,9 @@ export default function AllTasksTable() {
                         <CheckCircleOutlineIcon style={{ color: "green" }} />
                       ) : row.status === "P" ? (
                         <AutorenewIcon style={{ color: "yellow" }} />
-                      ) : (
-                        <ReportProblemIcon style={{ color: "red" }} />
-                      )}
+                      ) : row.status==="W"?(
+                        <HourglassEmptyIcon style={{ color: "red" }} />
+                      ):  row.status==="O"?<ReportProblemIcon/>:""}
                     </TableCell>
                     <TableCell align="left">
                       <div style={{ display: "flex", flexDirection: "row" }}>

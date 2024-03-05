@@ -177,7 +177,7 @@ export const Signup = () => {
                 icon={<ErrorOutlineIcon fontSize="inherit" />}
                 severity="error"
               >
-                Invalid Password
+                Weak password
               </Alert>
             )}
             <FormControl fullWidth style={{ margin: "10px 0" }}>

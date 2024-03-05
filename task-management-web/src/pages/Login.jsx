@@ -33,24 +33,22 @@ export const Login = () => {
       const response = await fetch("http://localhost:3000/api/auth/login", {
         method: "POST",
         redirect: "follow",
-        credentials: "include", 
+        credentials: "include",
         headers: headers,
         body: JSON.stringify(formData),
       });
       const data = await response.json();
-      if(data.message==="success"){
-           if(data.role === "manager") navigate("/manager-home");
-           else if (data.role === "employee") navigate("/employee-home");
-          console.log(data.message);
-      }
-      else if(response.status === 401){
-        if(data.error === "Invalid user email"){
+      if (data.message === "success") {
+        console.log(data.user_name);
+        localStorage.setItem("user_name", data.user_name);
+        if (data.role === "manager") navigate("/manager-home");
+        else if (data.role === "employee") navigate("/employee-home");
+        console.log(data.message);
+      } else if (response.status === 401) {
+        if (data.error === "Invalid user email") {
           setNotFoundStatus(true);
-        }
-        else if(data.error==="Invalid credentials"){
-          setFormData({...formData,
-            password: "",
-          });
+        } else if (data.error === "Invalid credentials") {
+          setFormData({ ...formData, password: "" });
           setWrongPasswordStatus(true);
         }
       }
@@ -59,7 +57,7 @@ export const Login = () => {
       //   password: "",
       // });
     } catch (error) {
-      console.log(error)
+      console.log(error);
     }
   };
   return (

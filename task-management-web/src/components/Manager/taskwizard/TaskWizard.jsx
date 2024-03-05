@@ -62,6 +62,13 @@ export default function TaskWizard() {
       else
     {
       console.log(res);
+      setTaskData({
+        assignee_email: "",
+        task_name: "",
+        task_desc: "",
+        dead_line: "",
+        effort: "",
+      });
       setOpen(false);
       setEffortError(false);
     }
