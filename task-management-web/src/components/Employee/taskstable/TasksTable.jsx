@@ -696,7 +696,8 @@ export default function EnhancedTable() {
             data={[
               { name: "Complete", value: data.filter((item) => item.status === "C").length },
               { name: "Pending", value: data.filter((item) => item.status === "P").length },
-              { name: "Approve", value: data.filter((item) => item.status === "A").length },
+              { name: "Waiting", value: data.filter((item) => item.status === "W").length },
+              { name: "Overdue", value: data.filter((item) => item.status === "O").length },
             ]}
           />
         </Box>
