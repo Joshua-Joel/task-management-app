@@ -7,7 +7,8 @@ function Dashboard() {
   const [completedTasksCount, setCompletedTasksCount] = useState(0);
   const [inProgressTasksCount, setInProgressTasksCount] = useState(0);
   const [notStartedTasksCount, setNotStartedTasksCount] = useState(0);
-
+  const [yetTobeApprovedCount, setYetTobeApprovedCount] = useState(0);
+  var currentDate = new Date().toISOString();
   // Fetch task
   useEffect(() => {
     const fetchData = async () => {
@@ -27,36 +28,42 @@ function Dashboard() {
         console.error("Error fetching data:", error);
       }
     };
-
     fetchData();
   }, []);
 
   useEffect(() => {
     const completedTasks = tasks.filter((task) => task.status === "C");
     const inProgressTasks = tasks.filter((task) => task.status === "P");
-    const notStartedTasks = tasks.filter((task) => task.status === "W");
+    const yetToApproveTasks = tasks.filter((task) => task.status === "W");
+    const notStartedTasks = tasks.filter(
+      (task) =>
+        task.dead_line.split("T")[0] < currentDate.split("T")[0] &&
+        task.status !== "C"
+    );
     setCompletedTasksCount(completedTasks.length);
-    setInProgressTasksCount (inProgressTasks.length);
-     setNotStartedTasksCount(notStartedTasks.length);
-  }, [tasks]);
+    setInProgressTasksCount(inProgressTasks.length);
+    setNotStartedTasksCount(notStartedTasks.length);
+    setYetTobeApprovedCount(yetToApproveTasks.length);
+  }, [currentDate,tasks]);
 
   return (
     <Grid
       sx={{ flexGrow: 1 }}
       container
       spacing={2}
-      style={{ paddingTop: "100px" }}
+      style={{ paddingTop: "70px" }}
     >
-      <Grid item xs={12}>
+      <Grid item>
         <Grid container justifyContent="center" spacing={3}>
-          {[0, 1, 2].map((value) => (
+          {[0, 1, 2, 3].map((value) => (
             <Grid key={value} item>
               <ActionAreaCard
                 num={value}
                 count={[
-                  completedTasksCount,
-                  inProgressTasksCount,
                   notStartedTasksCount,
+                  inProgressTasksCount,
+                  completedTasksCount,
+                  yetTobeApprovedCount,
                 ]}
               />
             </Grid>

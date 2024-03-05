@@ -1,12 +1,12 @@
 import * as React from "react";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
-import CardMedia from "@mui/material/CardMedia";
 import Typography from "@mui/material/Typography";
 import { CardActionArea } from "@mui/material";
 import pendingtask from "../../../assets/pendingtask.png";
 import completed from "../../../assets/completed.png";
 import notstarted from "../../../assets/notstarted.png";
+import notapproved from "../../../assets/notapproved.png";
 export default function ActionAreaCard(props) {
   const key = props.num;
   const count = props.count;
@@ -16,23 +16,26 @@ export default function ActionAreaCard(props) {
   const [name, setName] = React.useState("");
   const [cardcolor, setColor] = React.useState();
   React.useEffect(() => {
-    console.log("count", count);
-
-    if (key == 1) {
+    if (key === 3) {
+      setImg(notapproved);
+      setAlttext("alttext");
+      setName("Yet To Approve");
+      setColor("#B0DAFF");
+    } else if (key === 0) {
       setImg(notstarted);
       setAlttext("alttext");
-      setName("Not Started");
-      setColor("red");
-    } else if (key == 2) {
+      setName("Overdue");
+      setColor("#FF6868");
+    } else if (key === 1) {
       setImg(pendingtask);
       setAlttext("alttext");
       setName("Pending");
-      setColor("orange");
+      setColor("#FDFFAB");
     } else {
       setImg(completed);
       setAlttext("alttext");
       setName("Completed");
-      setColor("green");
+      setColor("#A1EEBD");
     }
   }, [key]);
 
