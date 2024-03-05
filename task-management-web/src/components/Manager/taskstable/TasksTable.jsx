@@ -147,8 +147,9 @@ TasksTable.propTypes = {
 
 function EnhancedTableToolbar(props) {
 
-  const [isStatus,setIsStatus]=useState('')
   const { numSelected } = props;
+
+  const [isStatus,setIsStatus]=useState('')
   const [type, setType] = useState("");
   const [state,setStatus]=useState("");
   const [fromDate,setFromDate]=useState(new Date());
@@ -215,7 +216,7 @@ function EnhancedTableToolbar(props) {
           sx={{ m: 1, width: "15ch", height: '20px'}}
           size="small"
           fullWidth
-        >
+          >
           <InputLabel id="role">Filter</InputLabel>
           <Select
             sx={{ width: "100%" }}
@@ -419,7 +420,7 @@ export default function AllTasksTable() {
 }
 
 
-    const [Filttype, setType] = useState("");
+  const [Filttype, setType] = useState("");
   const [state,setStatus]=useState("");
   const [fromDate,setFromDate]=useState(new Date());
   const [toDate,setToDate]=useState(new Date());
