@@ -4,7 +4,6 @@ const express = require("express");
 const cookieParser = require('cookie-parser');
 const cors = require("cors");
 const bodyParser = require("body-parser");
-// const kafkaProducer = require("../../services/kafkaProducer")
 
 const app = express();
 app.use(cors({ 

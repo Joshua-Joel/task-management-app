@@ -15,6 +15,8 @@ import { Button, Typography } from "@mui/material";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import AutorenewIcon from "@mui/icons-material/Autorenew";
 import ReportProblemIcon from "@mui/icons-material/ReportProblem";
+import { saveAs } from 'file-saver'; 
+
 
 const headCells = [
   {
@@ -73,7 +75,11 @@ const headCells = [
   },
 ];
 
-function TasksTable(props) {
+function EnhancedTableHead(props) {
+  
+  
+
+
   return (
     <TableHead>
       <TableRow>
@@ -92,7 +98,7 @@ function TasksTable(props) {
   );
 }
 
-TasksTable.propTypes = {
+EnhancedTableHead.propTypes = {
   numSelected: PropTypes.number.isRequired,
   onRequestSort: PropTypes.func.isRequired,
   onSelectAllClick: PropTypes.func.isRequired,
@@ -134,7 +140,7 @@ EnhancedTableToolbar.propTypes = {
   numSelected: PropTypes.number.isRequired,
 };
 
-export default function MyTasksTable() {
+export default function EnhancedTable() {
   const [data, setData] = useState([]);
   const formatDate = (inputDate) => {
     const date = new Date(inputDate);
@@ -145,6 +151,14 @@ export default function MyTasksTable() {
 
     return formattedDate;
   };
+
+  function sortByStatus(a,b)  {
+        if(a.status === 'P' )
+        return -1;
+        if(a.status === 'C' )
+        return 1;
+      // return 0;
+  }
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -158,19 +172,24 @@ export default function MyTasksTable() {
         });
 
         const result = await response.json();
+        
+        result.sort(sortByStatus);
         setData(result);
+        
       } catch (error) {
         console.error("Error fetching data:", error);
       }
     };
 
     fetchData();
-  }, []);
+  },[]);
   const [order, setOrder] = React.useState("asc");
   const [orderBy, setOrderBy] = React.useState("calories");
   const [selected, setSelected] = React.useState([]);
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
+
+  
 
   const handleRequestSort = (event, property) => {
     const isAsc = orderBy === property && order === "asc";
@@ -179,9 +198,10 @@ export default function MyTasksTable() {
   };
 
   const handleComplete = async (task_id, index) => {
+    
     try {
       const response = await fetch(
-        `http://localhost:3000/api/task/complete-task?task_id=${task_id}`,
+        `http://localhost:3000/api/task/request-approval?task_id=${task_id}`,
         {
           method: "PATCH",
           credentials: "include",
@@ -193,13 +213,16 @@ export default function MyTasksTable() {
       );
       if (response.ok) {
         const updatedData = [...data];
-        updatedData[index].status = "C"; 
+        updatedData[index].status = "W"; 
+        
         setData(updatedData);
+        console.log(data);
       }
     } catch (err) {
       console.log(err);
     }
   };
+  
 
   const handleSelectAllClick = (event) => {
     if (event.target.checked) {
@@ -216,6 +239,7 @@ export default function MyTasksTable() {
 
   const handleChangeRowsPerPage = (event) => {
     setRowsPerPage(parseInt(event.target.value, 10));
+    console.log("Current Page:", rowsPerPage);
     setPage(0);
   };
 
@@ -223,8 +247,57 @@ export default function MyTasksTable() {
   const emptyRows =
     page > 0 ? Math.max(0, (1 + page) * rowsPerPage - data.length) : 0;
 
+    const visibleRows = React.useMemo(
+      () =>
+        [...data].slice(
+          page * rowsPerPage,
+          page * rowsPerPage + rowsPerPage,
+        ),
+      [page, rowsPerPage,data],
+    );
+  const exportToCSV = () => {
+    const csvData = [];
+
+    // Adding CSV header
+    const header = headCells.slice(0, -1).map((headCell) => headCell.label);
+    console.log(header);
+    csvData.push(header);
+
+    // Adding rows
+    data.forEach((row) => {
+      const rowData = [
+        row.task_name,
+        row.task_desc,
+        row.assigner_name,
+        row.assigner_id,
+        formatDate(row.created_at),
+        formatDate(row.dead_line),
+        row.effort,
+        row.status,
+      ];
+
+      csvData.push(rowData);
+    });
+
+    // Convert to CSV string
+    const csvString = csvData.map((row) => row.join(",")).join("\n");
+
+    // Create a Blob and trigger download
+    const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8' });
+    saveAs(blob, 'my_tasks.csv');
+  };
+
+    
+
+    
+    
+
   return (
+
+    
+    
     <Box sx={{ width: "100%" }}>
+     
       <Paper sx={{ width: "100%", mb: 2 }}>
         <EnhancedTableToolbar numSelected={selected.length} />
         <TableContainer>
@@ -233,7 +306,7 @@ export default function MyTasksTable() {
             aria-labelledby="tableTitle"
             size={"medium"}
           >
-            <TasksTable
+            <EnhancedTableHead
               numSelected={selected.length}
               order={order}
               orderBy={orderBy}
@@ -242,7 +315,7 @@ export default function MyTasksTable() {
               rowCount={data.length}
             />
             <TableBody>
-              {data.map((row, index) => {
+              {visibleRows.map((row, index) => {
                 const isItemSelected = isSelected(index);
                 const labelId = `enhanced-table-checkbox-${index}`;
 
@@ -287,12 +360,35 @@ export default function MyTasksTable() {
                     </TableCell>
                     <TableCell align="left">
                       <div style={{ display: "flex", flexDirection: "row" }}>
+                      {
+
+                       
+                        row.status === 'P'?
+                        <Button
+                        variant="contained"
+                        onClick={() => handleComplete(row._id, index)}
+                      >
+                        Complete
+                      </Button>
+                      :
+                      row.status === 'C'?
+                      <Button
+                          variant="contained"
+                          disabled={true}
+                        >
+                          Completed
+                        </Button>
+                        :
                         <Button
                           variant="contained"
-                          onClick={() => handleComplete(row._id, index)}
+                          disabled={true}
                         >
-                          complete
+                          Pending
                         </Button>
+                  
+                      
+                      }
+                        
                       </div>
                     </TableCell>
                   </TableRow>
@@ -319,7 +415,11 @@ export default function MyTasksTable() {
           onPageChange={handleChangePage}
           onRowsPerPageChange={handleChangeRowsPerPage}
         />
+        <Button onClick={exportToCSV}>Export to CSV</Button>
       </Paper>
     </Box>
   );
 }
+
+
+

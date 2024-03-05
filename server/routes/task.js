@@ -16,29 +16,33 @@ router.post(
   "/assign-task",
   authenticateToken((role = "manager")),
   async (req, res) => {
-    console.log(req.body);
-    const { assignee_email, task_name, task_desc, dead_line, effort } =
-      req.body;
-    const assignee = await User.findOne(
-      { user_email: assignee_email },
-      { _id: 1 }
-    );
-    if(!assignee) res.status(400).json({ message: "employee not found..!" });
-    const assignee_id = assignee._id;
-    const assigner_id = req.user.user_id;
     try {
-      const task = new Task({
-        assigner_id,
-        assignee_id,
-        task_name,
-        task_desc,
-        dead_line,
-        effort,
-        status: "P",
-      });
-      const savedTask = await task.save();
-      res.status(200).json({ message: "task added successfully" });
-    } catch(error) {
+      console.log(req.body);
+      const { assignee_email, task_name, task_desc, dead_line, effort } =
+        req.body;
+      const assignee = await User.findOne(
+        { user_email: assignee_email },
+        { _id: 1 }
+      );
+      if (!assignee) {
+        res.status(400).json({ message: "employee not found..!" }).send();
+      } else {
+        const assignee_id = assignee._id;
+        const assigner_id = req.user.user_id;
+
+        const task = new Task({
+          assigner_id,
+          assignee_id,
+          task_name,
+          task_desc,
+          dead_line,
+          effort,
+          status: "P",
+        });
+        const savedTask = await task.save();
+        res.status(200).json({ message: "task added successfully" });
+      }
+    } catch (error) {
       res.status(500).json({ error: error.message });
     }
   }
@@ -57,7 +61,7 @@ router.get("/tasks", authenticateToken((role = "")), async (req, res) => {
       for (var i = 0; i < tasks.length; i++) {
         var user = await User.find(
           { _id: tasks[i].assignee_id },
-          { user_name: 1,user_email:1, _id: 0 }
+          { user_name: 1, user_email: 1, _id: 0 }
         );
         console.log("user_name: " + user);
         let {
@@ -70,7 +74,7 @@ router.get("/tasks", authenticateToken((role = "")), async (req, res) => {
           status,
           created_at,
         } = tasks[i];
-        console.log()
+        console.log();
         modTasks.push({
           _id,
           assignee_id,
@@ -85,10 +89,7 @@ router.get("/tasks", authenticateToken((role = "")), async (req, res) => {
         });
       }
     } else {
-      var tasks = await Task.find(
-        { assignee_id: user_id },
-        { __v: 0 }
-      );
+      var tasks = await Task.find({ assignee_id: user_id }, { __v: 0 });
       modTasks = [];
       for (var i = 0; i < tasks.length; i++) {
         var user = await User.find(
@@ -106,7 +107,7 @@ router.get("/tasks", authenticateToken((role = "")), async (req, res) => {
           status,
           created_at,
         } = tasks[i];
-        console.log()
+        console.log();
         modTasks.push({
           _id,
           assigner_id,
@@ -117,16 +118,67 @@ router.get("/tasks", authenticateToken((role = "")), async (req, res) => {
           effort,
           status,
           created_at,
-          
         });
       }
     }
-    console.log(modTasks)
+    console.log(modTasks);
     res.status(200).json(modTasks);
-  } catch(error) {
+  } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
+
+router.get(
+  "/waiting-tasks",
+  authenticateToken((role = "manager")),
+  async (req, res) => {
+    console.log("requested tasks");
+    try {
+      const user_id = req.user.user_id;
+      if (req.user.role === "manager") {
+        var tasks = await Task.find(
+          { assigner_id: user_id, status: "W" },
+          { assigner_id: 0, __v: 0 }
+        );
+        modTasks = [];
+        for (var i = 0; i < tasks.length; i++) {
+          var user = await User.find(
+            { _id: tasks[i].assignee_id },
+            { user_name: 1, user_email: 1, _id: 0 }
+          );
+          console.log("user_name: " + user);
+          let {
+            _id,
+            assignee_id,
+            task_name,
+            task_desc,
+            dead_line,
+            effort,
+            status,
+            created_at,
+          } = tasks[i];
+          console.log();
+          modTasks.push({
+            _id,
+            assignee_id,
+            assignee_name: Object.values(user)[0].user_name,
+            assignee_email: Object.values(user)[0].user_email,
+            task_name,
+            task_desc,
+            dead_line,
+            effort,
+            status,
+            created_at,
+          });
+        }
+      }
+      console.log(modTasks);
+      res.status(200).json(modTasks);
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  }
+);
 
 router.delete(
   "/delete-task",
@@ -141,7 +193,7 @@ router.delete(
       } else {
         res.status(400).json({ message: "task not found" });
       }
-    } catch(error) {
+    } catch (error) {
       res.status(500).json({ error: error.message });
     }
   }
@@ -151,11 +203,13 @@ router.patch("/update-task", authenticateToken("manager"), async (req, res) => {
   try {
     const { task_id, updated_task } = req.body;
     console.log(req.body);
-    try{
-      var user = await User.findOne({user_email:updated_task.assignee_email},{_id:1});
-      if(!user) res.status(400).json({message: "user not found"});
-    }
-    catch(error){
+    try {
+      var user = await User.findOne(
+        { user_email: updated_task.assignee_email },
+        { _id: 1 }
+      );
+      if (!user) res.status(400).json({ message: "user not found" });
+    } catch (error) {
       res.status(500).json({ error: error.message });
     }
     const updatedTask = await Task.updateOne(
@@ -173,25 +227,51 @@ router.patch("/update-task", authenticateToken("manager"), async (req, res) => {
     } else {
       res.status(400).json({ message: "task not found" });
     }
-  } catch(error) {
+  } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
 
-router.patch("/complete-task",authenticateToken(role=""),async (req,res)=>{
-  try{
-    const task_id = req.query.task_id;
-    const updated_task = await Task.updateOne({_id:task_id},{status:"C"});
-    if(updated_task){
-      res.status(200).json({message: "task completed successfully"});
-    }
-    else{
-      res.status(400).json({message: "task not found"});
+router.patch(
+  "/complete-task",
+  authenticateToken((role = "manager")),
+  async (req, res) => {
+    try {
+      const task_id = req.query.task_id;
+      const updated_task = await Task.updateOne(
+        { _id: task_id },
+        { status: "C" }
+      );
+      if (updated_task) {
+        res.status(200).json({ message: "task completed successfully" });
+      } else {
+        res.status(400).json({ message: "task not found" });
+      }
+    } catch (error) {
+      res.status(500).json({ error: error.message });
     }
   }
-  catch(error) {
-    res.status(500).json({ error: error.message });
+);
+
+router.patch(
+  "/request-approval",
+  authenticateToken((role = "")),
+  async (req, res) => {
+    try {
+      const task_id = req.query.task_id;
+      const updated_task = await Task.updateOne(
+        { _id: task_id },
+        { status: "W" }
+      );
+      if (updated_task) {
+        res.status(200).json({ message: "task completed successfully" });
+      } else {
+        res.status(400).json({ message: "task not found" });
+      }
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
   }
-})
+);
 
 module.exports = router;
