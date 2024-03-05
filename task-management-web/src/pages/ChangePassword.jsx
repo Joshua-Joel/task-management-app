@@ -5,10 +5,8 @@ import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
 import { Button, Alert } from "@mui/material";
 import { FormControl } from "@mui/material";
 import Link from "@mui/material/Link";
-import { useNavigate } from "react-router-dom";
 
 export const ChangePassword = () => {
-  const navigate = useNavigate();
   const [wrongPasswordStatus, setWrongPasswordStatus] = useState(false);
   const [successStatus, setSuccessStatus] = useState(false);
   const [formData, setFormData] = useState({
