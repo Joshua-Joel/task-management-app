@@ -36,6 +36,30 @@ router.post("/register", async (req, res) => {
   }
 });
 
+router.patch("/change-password",authenticateToken(role=""),async (req,res)=>{
+  
+  try{
+    const { current_password, new_password } = req.body;
+    console.log(req.body);
+    const user = await User.findOne({_id:req.user.user_id});
+    console.log("check");
+    if(!user) return res.status(400).json({message: "user not found"});
+    const isPasswordValid = await bcrypt.compare(current_password, user.password);
+    
+    if (!isPasswordValid) {
+      return res.status(401).json({ error: "Invalid credentials" }); 
+    }
+    else{
+      const hashedPassword = await bcrypt.hash(new_password, 10);
+      await User.updateOne({_id:req.user.user_id},{password:hashedPassword});
+      res.status(200).json({message: "success"});
+    }
+  }
+  catch(error) {
+    res.status(500).json({ error: error.message });
+  }
+})
+
 router.get("/logout",(req,res)=>{
   res.cookie('token', '', { expires: new Date(0) });
   res.json({ redirect: '/login' });
