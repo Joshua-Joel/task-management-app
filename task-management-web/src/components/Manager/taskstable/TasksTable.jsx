@@ -14,14 +14,16 @@ import Toolbar from "@mui/material/Toolbar";
 import Paper from "@mui/material/Paper";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { visuallyHidden } from "@mui/utils";
-import { Button, Typography } from "@mui/material";
+import { Button,InputLabel, Typography } from "@mui/material";
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import AutorenewIcon from '@mui/icons-material/Autorenew';
 import ReportProblemIcon from '@mui/icons-material/ReportProblem';
 import EditWizard from "../EditWizard/EditWizard";
 import { saveAs } from 'file-saver';
-
-
+import MenuItem from "@mui/material/MenuItem";
+import Select from "@mui/material/Select";
+import FormControl from "@mui/material/FormControl";
+import TextField from "@mui/material/TextField";
 const headCells = [
   {
     id: "Task",
@@ -86,32 +88,36 @@ function TasksTable(props) {
   };
 
   return (
-    <TableHead>
-      <TableRow>
-        <TableCell padding="checkbox"></TableCell>
-        {headCells.map((headCell) => (
-          <TableCell
-            key={headCell.id}
-            align={headCell.numeric ? "right" : "left"}
-            padding={headCell.disablePadding ? "none" : "normal"}
-            sortDirection={orderBy === headCell.id ? order : false}
-          >
-            <TableSortLabel
-              active={orderBy === headCell.id}
-              direction={orderBy === headCell.id ? order : "asc"}
-              onClick={createSortHandler(headCell.id)}
+    <>
+      <TableHead>
+        <TableRow>
+          <TableCell padding="checkbox"></TableCell>
+          {headCells.map((headCell) => (
+            <TableCell
+              key={headCell.id}
+              align={headCell.numeric ? "right" : "left"}
+              padding={headCell.disablePadding ? "none" : "normal"}
+              sortDirection={orderBy === headCell.id ? order : false}
             >
-              {headCell.label}
-              {orderBy === headCell.id ? (
-                <Box component="span" sx={visuallyHidden}>
-                  {order === "desc" ? "sorted descending" : "sorted ascending"}
-                </Box>
-              ) : null}
-            </TableSortLabel>
-          </TableCell>
-        ))}
-      </TableRow>
-    </TableHead>
+              <TableSortLabel
+                active={orderBy === headCell.id}
+                direction={orderBy === headCell.id ? order : "asc"}
+                onClick={createSortHandler(headCell.id)}
+              >
+                {headCell.label}
+                {orderBy === headCell.id ? (
+                  <Box component="span" sx={visuallyHidden}>
+                    {order === "desc"
+                      ? "sorted descending"
+                      : "sorted ascending"}
+                  </Box>
+                ) : null}
+              </TableSortLabel>
+            </TableCell>
+          ))}
+        </TableRow>
+      </TableHead>
+    </>
   );
 }
 
@@ -125,7 +131,45 @@ TasksTable.propTypes = {
 };
 
 function EnhancedTableToolbar(props) {
+
+  const [isStatus,setIsStatus]=useState('')
   const { numSelected } = props;
+  const [type, setType] = useState("");
+  const [state,setStatus]=useState("");
+  const [fromDate,setFromDate]=useState(new Date());
+  const [toDate,setToDate]=useState(new Date());
+
+  const handleChangeType = (e) => {
+    setType(e.target.value);
+    setIsStatus(e.target.value);
+  };
+
+  const handleChangeStatus = (e) => {
+    setStatus(e.target.value);
+    console.log(state);
+    
+  };
+
+  const handleDateFilter=()=>{
+    props.sendFilter({
+      type,
+      from: fromDate,
+      to:toDate
+    });
+  }
+
+  const handleStatusFilter=()=>{
+    props.sendFilter({
+      type,
+      value: state
+    });
+  }
+
+  const handleClearFilter=()=>{
+    props.reset();
+    setIsStatus('');
+    setType('');
+  }
 
   return (
     <Toolbar
@@ -147,7 +191,88 @@ function EnhancedTableToolbar(props) {
         id="tableTitle"
         component="div"
       >
-        All tasks
+        <div style={{display: "flex", flexDirection: "row" }}>
+          <div style={{marginTop:'10px', marginRight: '15px'}}>
+            All tasks
+          </div>
+          
+          <FormControl
+          sx={{ m: 1, width: "15ch", height: '20px'}}
+          size="small"
+          fullWidth
+        >
+          <InputLabel id="role">Filter</InputLabel>
+          <Select
+            sx={{ width: "100%" }}
+            labelId="role"
+            label="Filter"
+            value={type}
+            
+            onChange={handleChangeType}
+          >
+            <MenuItem value="Deadline">Deadline</MenuItem>
+            <MenuItem value="Status">Status</MenuItem>
+          </Select>
+        </FormControl>
+        {isStatus===''?<></>:
+         isStatus==="Status"?(
+          <>
+          <FormControl
+          sx={{ m: 1, width: "15ch", height: '10px'}}
+          size="small"
+          fullWidth
+        >
+          <InputLabel id="role1">Filter Data</InputLabel>
+          <Select
+            sx={{ width: "100%" }}
+            labelId="role1"
+            label="Filter Data"
+            value={state}
+            onChange={handleChangeStatus}
+          >
+            <MenuItem value="P">Pending</MenuItem>
+            <MenuItem value="C">Completed</MenuItem>
+            <MenuItem value="O">Overdue</MenuItem>
+            <MenuItem value="W">Waiting For Approval</MenuItem>
+          </Select>
+                
+        </FormControl>
+        <Button variant="contained" sx={{marginTop:"10px", marginLeft:"15px"}} onClick={handleStatusFilter}>Apply</Button>
+        
+        <Button variant="contained" sx={{marginTop:"10px", marginLeft:"15px"}} onClick={handleClearFilter}>Clear Filter</Button>
+        </>
+        ):(
+          <>
+          <TextField
+                sx={{m: 1, width: "15ch",height:"5px" }}
+                label="From date"
+                type="date"
+                InputLabelProps={{
+                  shrink: true,
+                }}
+                name="from"
+                value={fromDate}
+                onChange={(e)=>{setFromDate(e.target.value)}}
+              />
+        <TextField
+                sx={{m: 1, width: "15ch",height:"5px" }}
+                style={{ margin: " 10px 0 10px 0" }}
+                label="To date"
+                type="date"
+                InputLabelProps={{
+                  shrink: true,
+                }}
+                 name="to"
+                value={toDate}
+                onChange={(e)=>{setToDate(e.target.value)}}
+              />
+        <Button variant="contained" sx={{marginTop:"15px", marginLeft:"15px"}} onClick={handleDateFilter}>Apply</Button>      
+        
+        <Button variant="contained" sx={{marginTop:"10px", marginLeft:"15px"}} onClick={handleClearFilter}>Clear Filter</Button>
+        </>
+        )}
+        </div>
+        
       </Typography>
     </Toolbar>
   );
@@ -172,6 +297,39 @@ export default function AllTasksTable() {
 
     return formattedDate;
   };
+
+  function sortByStatus(a,b)  {
+    if(a.status === 'P' ||  a.status === 'W')
+    return -1;
+    // if(a.status == 'W')
+    // return 0;
+    if(a.status === 'C' )
+    return 1;
+  // return 0;
+}
+
+
+    const [Filttype, setType] = useState("");
+  const [state,setStatus]=useState("");
+  const [fromDate,setFromDate]=useState(new Date());
+  const [toDate,setToDate]=useState(new Date());
+
+  const handleFilter=(data)=>{
+    setType(data.type);
+    console.log(data);
+    if(Filttype=='Status'){
+      setStatus(data.value);
+    }else{
+      setFromDate(data.from)
+      setToDate(data.to)
+    }
+  }
+
+  const handleReset=()=>{
+      setType('')
+      console.log("Reset");
+  }
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -185,6 +343,7 @@ export default function AllTasksTable() {
         });
 
         const result = await response.json();
+        result.sort(sortByStatus);
         setData(result);
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -192,7 +351,7 @@ export default function AllTasksTable() {
     };
 
     fetchData();
-  }, []);
+  }, [Filttype]);
   const [order, setOrder] = React.useState("asc");
   const [orderBy, setOrderBy] = React.useState("calories");
   const [selected, setSelected] = React.useState([]);
@@ -250,6 +409,9 @@ export default function AllTasksTable() {
     setPage(0);
   };
 
+  
+
+
   const isSelected = (id) => selected.indexOf(id) !== -1;
   const emptyRows =
     page > 0 ? Math.max(0, (1 + page) * rowsPerPage - data.length) : 0;
@@ -288,7 +450,7 @@ export default function AllTasksTable() {
   return (
     <Box sx={{ width: "100%" }}>
       <Paper sx={{ width: "100%", mb: 2 }}>
-        <EnhancedTableToolbar numSelected={selected.length} />
+        <EnhancedTableToolbar numSelected={selected.length} reset={handleReset} sendFilter={handleFilter}/>
         <TableContainer>
           <Table
             sx={{ minWidth: 750 }}
@@ -304,10 +466,21 @@ export default function AllTasksTable() {
               rowCount={data.length}
             />
             <TableBody>
-              {data.map((row, index) => {
+              {data.filter((item)=>{
+                if(Filttype==''){
+                  return item;
+                }
+                if(Filttype==='Status'){
+                  return item.status===state;
+                }else if(Filttype==='Deadline'){
+                  const userDeadline = new Date(item.dead_line);
+                  return userDeadline >= new Date(fromDate) && userDeadline<= new Date(toDate);
+                }else{
+                  return item;
+                }
+              }).map((row, index) => {
                 const isItemSelected = isSelected(index);
                 const labelId = `enhanced-table-checkbox-${index}`;
-
                 return (
                   <TableRow
                     hover

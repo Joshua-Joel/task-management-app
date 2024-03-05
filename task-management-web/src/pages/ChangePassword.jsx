@@ -7,13 +7,13 @@ import { FormControl } from "@mui/material";
 import Link from "@mui/material/Link";
 import { useNavigate } from "react-router-dom";
 
-export const Login = () => {
+export const ChangePassword = () => {
   const navigate = useNavigate();
-  const [notFoundStatus, setNotFoundStatus] = useState(false);
   const [wrongPasswordStatus, setWrongPasswordStatus] = useState(false);
+  const [successStatus, setSuccessStatus] = useState(false);
   const [formData, setFormData] = useState({
-    user_email: "",
-    password: "",
+    current_password: "",
+    new_password: "",
   });
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -21,45 +21,37 @@ export const Login = () => {
       ...formData,
       [name]: value,
     });
+    console.log(formData);
   };
-  const handleLogin = async (e) => {
-    setNotFoundStatus(false); // Reset at the beginning of login attempt
+  const handleChangePassword = async (e) => {
     setWrongPasswordStatus(false);
     try {
       e.preventDefault();
       var headers = new Headers();
       headers.append("Content-Type", "application/json");
       headers.append("Accept", "application/json");
-      const response = await fetch("http://localhost:3000/api/auth/login", {
-        method: "POST",
-        redirect: "follow",
-        credentials: "include", 
-        headers: headers,
-        body: JSON.stringify(formData),
-      });
-      const data = await response.json();
-      if(data.message==="success"){
-           if(data.role === "manager") navigate("/manager-home");
-           else if (data.role === "employee") navigate("/employee-home");
-          console.log(data.message);
-      }
-      else if(response.status === 401){
-        if(data.error === "Invalid user email"){
-          setNotFoundStatus(true);
+      const response = await fetch(
+        "http://localhost:3000/api/user/change-password",
+        {
+          method: "PATCH",
+          redirect: "follow",
+          credentials: "include",
+          headers: headers,
+          body: JSON.stringify(formData),
         }
-        else if(data.error==="Invalid credentials"){
-          setFormData({...formData,
-            password: "",
-          });
+      );
+      const data = await response.json();
+      if (data.message === "success") {
+        setSuccessStatus(true);
+        console.log(data.message);
+      } else if (response.status === 401) {
+        if (data.error === "Invalid credentials") {
+          setFormData({ ...formData, current_password: "" });
           setWrongPasswordStatus(true);
         }
       }
-      // setFormData({
-      //   user_email: "",
-      //   password: "",
-      // });
     } catch (error) {
-      console.log(error)
+      console.log(error);
     }
   };
   return (
@@ -89,7 +81,7 @@ export const Login = () => {
         autoComplete="off"
       >
         <div>
-          <strong style={{ fontSize: "22px" }}>Sign in</strong>
+          <strong style={{ fontSize: "22px" }}>Change password</strong>
         </div>
         <div
           noValidate
@@ -108,33 +100,26 @@ export const Login = () => {
           <FormControl sx={{ width: "45ch" }}>
             <TextField
               style={{ margin: " 10px 0 10px 0" }}
-              id="useremail-id"
-              name="user_email"
-              label="User email"
+              id="current_password"
+              name="current_password"
+              type="password"
+              label="Current password"
               variant="outlined"
-              value={formData.user_email}
+              value={formData.current_password}
               onChange={handleInputChange}
               required
             />
             <TextField
               style={{ margin: "20px 0" }}
-              id="password-id"
-              name="password"
+              id="new_password"
+              name="new_password"
               type="password"
-              label="Password"
+              label="New password"
               variant="outlined"
-              value={formData.password}
+              value={formData.new_password}
               onChange={handleInputChange}
               required
             />
-            {notFoundStatus && (
-              <Alert
-                icon={<ErrorOutlineIcon fontSize="inherit" />}
-                severity="error"
-              >
-                User not found..!
-              </Alert>
-            )}
             {wrongPasswordStatus && (
               <Alert
                 icon={<ErrorOutlineIcon fontSize="inherit" />}
@@ -143,35 +128,21 @@ export const Login = () => {
                 Wrong password. Please try again!
               </Alert>
             )}
+            {successStatus && (
+              <Alert
+                severity="success"
+              >
+                Password successfully changed..!
+              </Alert>
+            )}
             <Button
               style={{ margin: "20px 0" }}
-              onClick={handleLogin}
+              onClick={handleChangePassword}
               variant="contained"
             >
-              Login
+              Change password
             </Button>
-            {/* <hr
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                flexDirection: "row",
-                width: "60%",
-                alignItems: "center",
-                backgroundColor: "black",
-              }}
-            /> */}
-            {/* <Button
-              style={{ margin: "20px 0" }}
-              onClick={() => {
-                navigate("/signup");
-              }}
-              variant="outlined"
-            >
-              Sign up
-            </Button> */}
-            <Link href="/signup" underline="hover">
-              Signup
-            </Link>
+            <Link href="/login" underline="hover">Go Back</Link>
           </FormControl>
         </div>
       </Box>

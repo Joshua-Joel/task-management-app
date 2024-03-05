@@ -177,6 +177,13 @@ function ManagerNavBar() {
               open={Boolean(anchorElUser)}
               onClose={handleCloseUserMenu}
             >
+              <MenuItem
+                onClick={() => {
+                  navigate("/change-password");
+                }}
+              >
+                <Typography textAlign="center">change password</Typography>
+              </MenuItem>
               <MenuItem onClick={handleLogout}>
                 <Typography textAlign="center">Logout</Typography>
               </MenuItem>

@@ -8,6 +8,7 @@ import { ViewAllTasks } from './pages/ViewAllTasks';
 import { ViewMyTask } from './pages/ViewMyTask';
 import { EmployeeHome } from './pages/EmployeeHome';
 import { RequestApproval } from './pages/RequestApproval';
+import { ChangePassword } from './pages/ChangePassword';
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
         <Route path="/" element={<Login />}></Route>
         <Route path="/login" element={<Login />}></Route> 
         <Route path="/signup" element={<Signup />}></Route>
+        <Route path="/change-password" element={<ChangePassword/>}></Route>
         <Route path="/manager-home" element={<ManagerHome />}></Route>
         <Route path="/employee-home" element={<EmployeeHome />}></Route>
         <Route path="/view-all-tasks" element={<ViewAllTasks />}></Route>
