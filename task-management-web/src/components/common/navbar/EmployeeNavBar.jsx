@@ -38,9 +38,9 @@ function EmployeeNavBar() {
     setAnchorElUser(null);
   };
 
-  const handleLogout = aysnc ()=> {
+  const handleLogout =async ()=>{
     try{
-      const response = await fectch("",{
+      const response = await fetch("",{
         method: "GET",
         credentials: "include",
         headers: {
