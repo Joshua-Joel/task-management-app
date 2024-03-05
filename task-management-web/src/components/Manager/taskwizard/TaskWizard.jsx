@@ -35,7 +35,7 @@ export default function TaskWizard() {
 
   const handleAssign = async () => {
     console.log(taskData);
-    if(taskData.effort > days)
+    if(taskData.effort > days || taskData.effort <= 0)
     {
       setEffortError(true);
     }
