@@ -33,7 +33,7 @@ router.post("/login", async (req, res) => {
       httpOnly: true,
       sameSite:"lax",
       expire : 24 * 60 * 60 * 1000 
-    }).json({token,message:"success",role:user.role});
+    }).json({token,message:"success",role:user.role,user_name:user.user_name});
     
   } catch (error) {
     res.status(500).json({ error: error.message });
