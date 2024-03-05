@@ -20,8 +20,11 @@ import AutorenewIcon from '@mui/icons-material/Autorenew';
 import ReportProblemIcon from '@mui/icons-material/ReportProblem';
 import EditWizard from "../EditWizard/EditWizard";
 import { saveAs } from 'file-saver';
-
-
+import { ButtonGroup } from "@mui/material";
+import MenuItem from "@mui/material/MenuItem";
+import Select from "@mui/material/Select";
+import FormControl from "@mui/material/FormControl";
+import TextField from "@mui/material/TextField";
 const headCells = [
   {
     id: "Task",
@@ -86,32 +89,36 @@ function TasksTable(props) {
   };
 
   return (
-    <TableHead>
-      <TableRow>
-        <TableCell padding="checkbox"></TableCell>
-        {headCells.map((headCell) => (
-          <TableCell
-            key={headCell.id}
-            align={headCell.numeric ? "right" : "left"}
-            padding={headCell.disablePadding ? "none" : "normal"}
-            sortDirection={orderBy === headCell.id ? order : false}
-          >
-            <TableSortLabel
-              active={orderBy === headCell.id}
-              direction={orderBy === headCell.id ? order : "asc"}
-              onClick={createSortHandler(headCell.id)}
+    <>
+      <TableHead>
+        <TableRow>
+          <TableCell padding="checkbox"></TableCell>
+          {headCells.map((headCell) => (
+            <TableCell
+              key={headCell.id}
+              align={headCell.numeric ? "right" : "left"}
+              padding={headCell.disablePadding ? "none" : "normal"}
+              sortDirection={orderBy === headCell.id ? order : false}
             >
-              {headCell.label}
-              {orderBy === headCell.id ? (
-                <Box component="span" sx={visuallyHidden}>
-                  {order === "desc" ? "sorted descending" : "sorted ascending"}
-                </Box>
-              ) : null}
-            </TableSortLabel>
-          </TableCell>
-        ))}
-      </TableRow>
-    </TableHead>
+              <TableSortLabel
+                active={orderBy === headCell.id}
+                direction={orderBy === headCell.id ? order : "asc"}
+                onClick={createSortHandler(headCell.id)}
+              >
+                {headCell.label}
+                {orderBy === headCell.id ? (
+                  <Box component="span" sx={visuallyHidden}>
+                    {order === "desc"
+                      ? "sorted descending"
+                      : "sorted ascending"}
+                  </Box>
+                ) : null}
+              </TableSortLabel>
+            </TableCell>
+          ))}
+        </TableRow>
+      </TableHead>
+    </>
   );
 }
 
@@ -125,7 +132,39 @@ TasksTable.propTypes = {
 };
 
 function EnhancedTableToolbar(props) {
+  const statusList = ["Completed", "Pending"];
+  const [isStatus,setIsStatus]=useState('')
   const { numSelected } = props;
+  const [type, setType] = useState("");
+  const [state,setStatus]=useState("");
+  const [fromDate,setFromDate]=useState(new Date());
+  const [toDate,setToDate]=useState(new Date());
+
+  const handleChangeType = (e) => {
+    setType(e.target.value);
+    setIsStatus(e.target.value);
+  };
+
+  const handleChangeStatus = (e) => {
+    setStatus(e.target.value);
+    console.log(state);
+    
+  };
+
+  const handleDateFilter=()=>{
+    props.sendFilter({
+      type,
+      from: fromDate,
+      to:toDate
+    });
+  }
+
+  const handleStatusFilter=()=>{
+    props.sendFilter({
+      type,
+      value: state
+    });
+  }
 
   return (
     <Toolbar
@@ -147,7 +186,82 @@ function EnhancedTableToolbar(props) {
         id="tableTitle"
         component="div"
       >
-        All tasks
+        <div style={{display: "flex", flexDirection: "row" }}>
+          <div style={{marginTop:'10px', marginRight: '15px'}}>
+            All tasks
+          </div>
+          
+          <FormControl
+          sx={{ m: 1, width: "15ch", height: '20px'}}
+          size="small"
+          fullWidth
+        >
+          <InputLabel id="role">Filter</InputLabel>
+          <Select
+            sx={{ width: "100%" }}
+            labelId="role"
+            label="Filter"
+            value={type}
+            
+            onChange={handleChangeType}
+          >
+            <MenuItem value="Deadline">Deadline</MenuItem>
+            <MenuItem value="Status">Status</MenuItem>
+          </Select>
+        </FormControl>
+        {isStatus==''?<></>:
+         isStatus=="Status"?(
+          <>
+          <FormControl
+          sx={{ m: 1, width: "15ch", height: '10px'}}
+          size="small"
+          fullWidth
+        >
+          <InputLabel id="role1">Filter Data</InputLabel>
+          <Select
+            sx={{ width: "100%" }}
+            labelId="role1"
+            label="Filter Data"
+            value={state}
+            onChange={handleChangeStatus}
+          >
+            <MenuItem value="P">Pending</MenuItem>
+            <MenuItem value="C">Completed</MenuItem>
+          </Select>
+                
+        </FormControl>
+        <Button variant="contained" sx={{marginTop:"10px", marginLeft:"15px"}} onClick={handleStatusFilter}>Apply</Button>
+        </>
+        ):(
+          <>
+          <TextField
+                sx={{m: 1, width: "15ch",height:"5px" }}
+                label="From date"
+                type="date"
+                InputLabelProps={{
+                  shrink: true,
+                }}
+                name="from"
+                value={fromDate}
+                onChange={(e)=>{setFromDate(e.target.value)}}
+              />
+        <TextField
+                sx={{m: 1, width: "15ch",height:"5px" }}
+                style={{ margin: " 10px 0 10px 0" }}
+                label="To date"
+                type="date"
+                InputLabelProps={{
+                  shrink: true,
+                }}
+                 name="to"
+                value={toDate}
+                onChange={(e)=>{setToDate(e.target.value)}}
+              />
+        <Button variant="contained" sx={{marginTop:"15px", marginLeft:"15px"}} onClick={handleDateFilter}>Apply</Button>      
+        </>
+        )}
+        </div>
+        
       </Typography>
     </Toolbar>
   );
@@ -217,30 +331,32 @@ export default function AllTasksTable() {
     setOrderBy(property);
   };
 
-  const handleDelete = async (task_id,index) => {
-    try{
-        const response = await fetch(`http://localhost:3000/api/task/delete-task?task_id=${task_id}`,{
-            method: "DELETE",
-            credentials: "include",
-            headers: {
-              "Content-Type": "application/json",
-              Accept: "application/json",
-            }
-        })
-        if(response.ok){
-            const result = await response.json();
-            console.log(result);
-            const newData = [...data];
-            newData.splice(index, 1);
-
-            // Updating the state with the new array
-            setData(newData);
+  const handleDelete = async (task_id, index) => {
+    try {
+      const response = await fetch(
+        `http://localhost:3000/api/task/delete-task?task_id=${task_id}`,
+        {
+          method: "DELETE",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
         }
+      );
+      if (response.ok) {
+        const result = await response.json();
+        console.log(result);
+        const newData = [...data];
+        newData.splice(index, 1);
+
+        // Updating the state with the new array
+        setData(newData);
+      }
+    } catch (err) {
+      console.log(err);
     }
-    catch(err){
-        console.log(err);
-    }
-  }
+  };
 
   const handleSelectAllClick = (event) => {
     if (event.target.checked) {
@@ -259,6 +375,23 @@ export default function AllTasksTable() {
     setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
   };
+
+  
+  const [Filttype, setType] = useState("");
+  const [state,setStatus]=useState("");
+  const [fromDate,setFromDate]=useState(new Date());
+  const [toDate,setToDate]=useState(new Date());
+
+  const handleFilter=(data)=>{
+    setType(data.type);
+    console.log(data);
+    if(Filttype=='Status'){
+      setStatus(data.value);
+    }else{
+      setFromDate(data.from)
+      setToDate(data.to)
+    }
+  }
 
   const isSelected = (id) => selected.indexOf(id) !== -1;
   const emptyRows =
@@ -298,7 +431,7 @@ export default function AllTasksTable() {
   return (
     <Box sx={{ width: "100%" }}>
       <Paper sx={{ width: "100%", mb: 2 }}>
-        <EnhancedTableToolbar numSelected={selected.length} />
+        <EnhancedTableToolbar numSelected={selected.length} sendFilter={handleFilter}/>
         <TableContainer>
           <Table
             sx={{ minWidth: 750 }}
@@ -314,7 +447,16 @@ export default function AllTasksTable() {
               rowCount={data.length}
             />
             <TableBody>
-              {data.map((row, index) => {
+              {data.filter((item)=>{
+                if(Filttype=='Status'){
+                  return item.status==state;
+                }else if(Filttype=='Deadline'){
+                  const userDeadline = new Date(item.dead_line);
+                  return userDeadline >= new Date(fromDate) && userDeadline<= new Date(toDate);
+                }else{
+                  return item;
+                }
+              }).map((row, index) => {
                 const isItemSelected = isSelected(index);
                 const labelId = `enhanced-table-checkbox-${index}`;
 
@@ -348,12 +490,19 @@ export default function AllTasksTable() {
                       {formatDate(row.dead_line)}
                     </TableCell>
                     <TableCell align="right">{row.effort}</TableCell>
-                    <TableCell align="left">{row.status==="C"?<CheckCircleOutlineIcon style={{color:"green"}}/>:row.status==="P"?<AutorenewIcon style={{color:"yellow"}}/>:<ReportProblemIcon style={{color:"red"}}/>}</TableCell>
+                    <TableCell align="left">
+                      {row.status === "C" ? (
+                        <CheckCircleOutlineIcon style={{ color: "green" }} />
+                      ) : row.status === "P" ? (
+                        <AutorenewIcon style={{ color: "yellow" }} />
+                      ) : (
+                        <ReportProblemIcon style={{ color: "red" }} />
+                      )}
+                    </TableCell>
                     <TableCell align="left">
                       <div style={{ display: "flex", flexDirection: "row" }}>
-                        <EditWizard values={row}/>
-                        <Button onClick={()=>handleDelete(row._id,index)}>
-                        
+                        <EditWizard values={row} />
+                        <Button onClick={() => handleDelete(row._id, index)}>
                           <DeleteIcon
                             style={{ color: "red", padding: "4px" }}
                           />
