@@ -14,12 +14,13 @@ import Toolbar from "@mui/material/Toolbar";
 import Paper from "@mui/material/Paper";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { visuallyHidden } from "@mui/utils";
-import { Button,InputLabel, Typography } from "@mui/material";
+import { Button,InputLabel , Typography } from "@mui/material";
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import AutorenewIcon from '@mui/icons-material/Autorenew';
 import ReportProblemIcon from '@mui/icons-material/ReportProblem';
-import EditWizard from "../editwizard/EditWizard";
+import EditWizard from "../EditWizard/EditWizard";
 import { saveAs } from 'file-saver';
+import html2canvas from 'html2canvas';
 import MenuItem from "@mui/material/MenuItem";
 import Select from "@mui/material/Select";
 import FormControl from "@mui/material/FormControl";
@@ -146,8 +147,9 @@ TasksTable.propTypes = {
 
 function EnhancedTableToolbar(props) {
 
-  const [isStatus,setIsStatus]=useState('')
   const { numSelected } = props;
+
+  const [isStatus,setIsStatus]=useState('')
   const [type, setType] = useState("");
   const [state,setStatus]=useState("");
   const [fromDate,setFromDate]=useState(new Date());
@@ -214,7 +216,7 @@ function EnhancedTableToolbar(props) {
           sx={{ m: 1, width: "15ch", height: '20px'}}
           size="small"
           fullWidth
-        >
+          >
           <InputLabel id="role">Filter</InputLabel>
           <Select
             sx={{ width: "100%" }}
@@ -328,7 +330,7 @@ const CustomTooltip = ({ active, payload, label, data }) => {
   return null;
 };
 const MyPieChart = ({ data }) => {
-  const COLORS = ["#0088FE", "#00C49F", "#FFBB28"];
+  const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF0000"];
   return (
     <PieChart width={400} height={300}>
       <Pie
@@ -374,6 +376,22 @@ const MyScatterChart = ({ data }) => {
     </ScatterChart>
   );
 };
+const downloadReportAsImage = async (containerId, fileName) => {
+  try {
+    const container = document.getElementById(containerId);
+
+    // Use html2canvas to capture the entire container as an image
+    const canvas = await html2canvas(container);
+
+    // Convert the canvas to a Blob
+    canvas.toBlob((blob) => {
+      // Save the Blob as a file using file-saver
+      saveAs(blob, `${fileName}.png`);
+    });
+  } catch (error) {
+    console.error('Error downloading report:', error);
+  }
+};
 
 export default function AllTasksTable() {
   const [data, setData] = useState([]);
@@ -402,7 +420,7 @@ export default function AllTasksTable() {
 }
 
 
-    const [Filttype, setType] = useState("");
+  const [Filttype, setType] = useState("");
   const [state,setStatus]=useState("");
   const [fromDate,setFromDate]=useState(new Date());
   const [toDate,setToDate]=useState(new Date());
@@ -654,7 +672,7 @@ export default function AllTasksTable() {
           onPageChange={handleChangePage}
           onRowsPerPageChange={handleChangeRowsPerPage}
         />
-        <Box sx={{ display: "flex", flexDirection: "row", flexWrap: "wrap" , gap: "20%"}}>
+        <Box sx={{ display: "flex", flexDirection: "row", flexWrap: "wrap" , gap: "20%"}} id="reportContainer" >
         <Box sx={{ width: "33%", marginRight: "2%" }}>
           <MyBarChart data={data} />
         </Box>
@@ -663,7 +681,8 @@ export default function AllTasksTable() {
             data={[
               { name: "Complete", value: data.filter((item) => item.status === "C").length },
               { name: "Pending", value: data.filter((item) => item.status === "P").length },
-              { name: "Approve", value: data.filter((item) => item.status === "A").length },
+              { name: "Waiting", value: data.filter((item) => item.status === "W").length },
+              { name: "Overdue", value: data.filter((item) => item.status === "O").length },
             ]}
           />
         </Box>
@@ -672,6 +691,9 @@ export default function AllTasksTable() {
           <MyScatterChart data={transformedData} />
         </Box>
         </Box>
+        <Button sx={{left:"45%"}} onClick={() => downloadReportAsImage('reportContainer', 'chart_report')}>
+          Download Report
+        </Button>
       </Paper>
     </Box>
   );

@@ -2,12 +2,15 @@ import * as React from "react";
 import Button from "@mui/material/Button";
 import Dialog from "@mui/material/Dialog";
 import EditIcon from "@mui/icons-material/Edit";
+import  {Alert}  from "@mui/material";
+import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
 
 import { Box, FormControl, TextField } from "@mui/material";
 
 export default function EditWizard({ values }) {
   const [open, setOpen] = React.useState(false);
-
+  const [emailError,setEmailError] = React.useState(false);
+  const [effortError,setEffortError] = React.useState(false);
   const [taskData, setTaskData] = React.useState({
     task_id: values._id,
     updated_task: {
@@ -36,8 +39,39 @@ export default function EditWizard({ values }) {
         },
       });
   };
+  const today = new Date();
+  function formatDateToYYYYMMDD(date) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+  
+    return `${year}-${month}-${day}`;
+  }
+  const formattedDate = formatDateToYYYYMMDD(today);
+
+  const calculateDaysBetweenDates = (startDate, endDate) => {
+    const oneDay = 24 * 60 * 60 * 1000; // hours * minutes * seconds * milliseconds
+
+    const startDateTime = new Date(startDate);
+    const endDateTime = new Date(endDate);
+
+    // Calculate the difference in milliseconds
+    const timeDifference = Math.abs(endDateTime - startDateTime);
+
+    // Calculate the number of days
+    const numberOfDays = Math.round(timeDifference / oneDay);
+
+    return numberOfDays;
+  };
   const handleAssign = async () => {
-    console.log(taskData);
+    const days = await calculateDaysBetweenDates(formattedDate,taskData.dead_line);
+    console.log(days)
+    if(taskData.effort > days || taskData.effort <= 0)
+    {
+      console.log(days)
+      setEffortError(true);
+    }
+    else{
     try {
       const response = await fetch(
         "http://localhost:3000/api/task/update-task",
@@ -52,12 +86,25 @@ export default function EditWizard({ values }) {
         }
       );
       const res = await response.json();
+      if(res.message === "employee not found..!")
+      {
+        setEmailError(true);
+      }
+      else
+    {
       console.log(res);
       setOpen(false);
+      setEffortError(false);
+    }
+    
     } catch (err) {
       console.log(err);
     }
+  }
   };
+
+
+
   return (
     <React.Fragment>
       <Button onClick={handleClickOpen}>
@@ -112,6 +159,14 @@ export default function EditWizard({ values }) {
                 value={taskData.updated_task.assignee_email}
                 onChange={handleInputChange}
               />
+               {emailError && (
+              <Alert
+                icon={<ErrorOutlineIcon fontSize="inherit" />}
+                severity="error"
+              >
+               Employee Not Found..!
+              </Alert>
+            )}
               <TextField
                 style={{ margin: " 10px 0 10px 0" }}
                 name="task_name"
@@ -137,6 +192,9 @@ export default function EditWizard({ values }) {
                 InputLabelProps={{
                   shrink: true,
                 }}
+                inputProps={{
+                  min:  formattedDate,
+                }}
                 name="dead_line"
                 value={taskData.updated_task.dead_line}
                 onChange={handleInputChange}
@@ -150,6 +208,14 @@ export default function EditWizard({ values }) {
                 value={taskData.updated_task.effort}
                 onChange={handleInputChange}
               />
+               {effortError && (
+              <Alert
+                icon={<ErrorOutlineIcon fontSize="inherit" />}
+                severity="error"
+              >
+               Effort can't exceed Deadline
+              </Alert>
+            )}
               <Button
                 style={{ margin: "20px 0" }}
                 variant="contained"
