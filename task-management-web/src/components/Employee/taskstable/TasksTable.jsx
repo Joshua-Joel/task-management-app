@@ -308,7 +308,7 @@ const CustomTooltip = ({ active, payload, label, data }) => {
 
 
 const MyPieChart = ({ data }) => {
-  const COLORS = ["#0088FE", "#00C49F", "#FFBB28"];
+  const COLORS = ["#0088FE", "#00C49F", "#FFBB28","#FF0000"];
   return (
     <PieChart width={400} height={300}>
       <Pie
@@ -651,13 +651,20 @@ export default function EnhancedTable() {
                           Completed
                         </Button>
                         :
+                        row.status === 'W'?
                         <Button
                           variant="contained"
                           disabled={true}
                         >
                           Pending
                         </Button>
-                  
+                  :
+                  <Button
+                          variant="contained"
+                          disabled={true}
+                        >
+                          Overdue
+                        </Button>
                       
                       }
                         

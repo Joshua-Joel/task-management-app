@@ -18,7 +18,7 @@ import { Button,InputLabel , Typography } from "@mui/material";
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import AutorenewIcon from '@mui/icons-material/Autorenew';
 import ReportProblemIcon from '@mui/icons-material/ReportProblem';
-import EditWizard from "../editwizard/EditWizard";
+import EditWizard from "../EditWizard/EditWizard";
 import { saveAs } from 'file-saver';
 import html2canvas from 'html2canvas';
 import MenuItem from "@mui/material/MenuItem";
@@ -330,7 +330,7 @@ const CustomTooltip = ({ active, payload, label, data }) => {
   return null;
 };
 const MyPieChart = ({ data }) => {
-  const COLORS = ["#0088FE", "#00C49F", "#FFBB28"];
+  const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF0000"];
   return (
     <PieChart width={400} height={300}>
       <Pie
