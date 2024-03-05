@@ -166,6 +166,12 @@ function EnhancedTableToolbar(props) {
     });
   }
 
+  const handleClearFilter=()=>{
+    props.reset();
+    setIsStatus('');
+    setType('');
+  }
+
   return (
     <Toolbar
       sx={{
@@ -227,10 +233,14 @@ function EnhancedTableToolbar(props) {
           >
             <MenuItem value="P">Pending</MenuItem>
             <MenuItem value="C">Completed</MenuItem>
+            <MenuItem value="O">Overdue</MenuItem>
+            <MenuItem value="W">Waiting For Approval</MenuItem>
           </Select>
                 
         </FormControl>
         <Button variant="contained" sx={{marginTop:"10px", marginLeft:"15px"}} onClick={handleStatusFilter}>Apply</Button>
+        
+        <Button variant="contained" sx={{marginTop:"10px", marginLeft:"15px"}} onClick={handleClearFilter}>Clear Filter</Button>
         </>
         ):(
           <>
@@ -258,6 +268,8 @@ function EnhancedTableToolbar(props) {
                 onChange={(e)=>{setToDate(e.target.value)}}
               />
         <Button variant="contained" sx={{marginTop:"15px", marginLeft:"15px"}} onClick={handleDateFilter}>Apply</Button>      
+        
+        <Button variant="contained" sx={{marginTop:"10px", marginLeft:"15px"}} onClick={handleClearFilter}>Clear Filter</Button>
         </>
         )}
         </div>
@@ -286,6 +298,28 @@ export default function AllTasksTable() {
 
     return formattedDate;
   };
+
+    const [Filttype, setType] = useState("");
+  const [state,setStatus]=useState("");
+  const [fromDate,setFromDate]=useState(new Date());
+  const [toDate,setToDate]=useState(new Date());
+
+  const handleFilter=(data)=>{
+    setType(data.type);
+    console.log(data);
+    if(Filttype=='Status'){
+      setStatus(data.value);
+    }else{
+      setFromDate(data.from)
+      setToDate(data.to)
+    }
+  }
+
+  const handleReset=()=>{
+      setType('')
+      console.log("Reset");
+  }
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -306,7 +340,7 @@ export default function AllTasksTable() {
     };
 
     fetchData();
-  }, []);
+  }, [Filttype]);
   const [order, setOrder] = React.useState("asc");
   const [orderBy, setOrderBy] = React.useState("calories");
   const [selected, setSelected] = React.useState([]);
@@ -365,21 +399,7 @@ export default function AllTasksTable() {
   };
 
   
-  const [Filttype, setType] = useState("");
-  const [state,setStatus]=useState("");
-  const [fromDate,setFromDate]=useState(new Date());
-  const [toDate,setToDate]=useState(new Date());
 
-  const handleFilter=(data)=>{
-    setType(data.type);
-    console.log(data);
-    if(Filttype=='Status'){
-      setStatus(data.value);
-    }else{
-      setFromDate(data.from)
-      setToDate(data.to)
-    }
-  }
 
   const isSelected = (id) => selected.indexOf(id) !== -1;
   const emptyRows =
@@ -419,7 +439,7 @@ export default function AllTasksTable() {
   return (
     <Box sx={{ width: "100%" }}>
       <Paper sx={{ width: "100%", mb: 2 }}>
-        <EnhancedTableToolbar numSelected={selected.length} sendFilter={handleFilter}/>
+        <EnhancedTableToolbar numSelected={selected.length} reset={handleReset} sendFilter={handleFilter}/>
         <TableContainer>
           <Table
             sx={{ minWidth: 750 }}
@@ -436,6 +456,9 @@ export default function AllTasksTable() {
             />
             <TableBody>
               {data.filter((item)=>{
+                if(Filttype==''){
+                  return item;
+                }
                 if(Filttype=='Status'){
                   return item.status==state;
                 }else if(Filttype=='Deadline'){
@@ -447,7 +470,6 @@ export default function AllTasksTable() {
               }).map((row, index) => {
                 const isItemSelected = isSelected(index);
                 const labelId = `enhanced-table-checkbox-${index}`;
-
                 return (
                   <TableRow
                     hover
