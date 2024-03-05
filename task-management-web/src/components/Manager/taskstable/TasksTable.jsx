@@ -18,7 +18,7 @@ import { Button,InputLabel, Typography } from "@mui/material";
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import AutorenewIcon from '@mui/icons-material/Autorenew';
 import ReportProblemIcon from '@mui/icons-material/ReportProblem';
-import EditWizard from "../EditWizard/EditWizard";
+import EditWizard from "../editwizard/EditWizard";
 import { saveAs } from 'file-saver';
 import html2canvas from 'html2canvas';
 import MenuItem from "@mui/material/MenuItem";
@@ -427,7 +427,7 @@ export default function AllTasksTable() {
   const handleFilter=(data)=>{
     setType(data.type);
     console.log(data);
-    if(Filttype=='Status'){
+    if(Filttype==='Status'){
       setStatus(data.value);
     }else{
       setFromDate(data.from)
@@ -584,7 +584,7 @@ export default function AllTasksTable() {
             />
             <TableBody>
               {data.filter((item)=>{
-                if(Filttype==''){
+                if(Filttype===''){
                   return item;
                 }
                 if(Filttype==='Status'){
