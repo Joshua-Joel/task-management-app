@@ -12,15 +12,11 @@ import TableRow from "@mui/material/TableRow";
 import TableSortLabel from "@mui/material/TableSortLabel";
 import Toolbar from "@mui/material/Toolbar";
 import Paper from "@mui/material/Paper";
-import DeleteIcon from "@mui/icons-material/Delete";
 import { visuallyHidden } from "@mui/utils";
 import { Button, Typography } from "@mui/material";
-import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
-import AutorenewIcon from '@mui/icons-material/Autorenew';
-import ReportProblemIcon from '@mui/icons-material/ReportProblem';
-import EditWizard from "../editwizard/EditWizard";
-import { saveAs } from 'file-saver';
-
+import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
+import AutorenewIcon from "@mui/icons-material/Autorenew";
+import ReportProblemIcon from "@mui/icons-material/ReportProblem";
 
 const headCells = [
   {
@@ -157,7 +153,7 @@ EnhancedTableToolbar.propTypes = {
   numSelected: PropTypes.number.isRequired,
 };
 
-export default function AllTasksTable() {
+export default function ApprovalTable() {
   const [data, setData] = useState([]);
   const formatDate = (inputDate) => {
     const date = new Date(inputDate);
@@ -172,17 +168,46 @@ export default function AllTasksTable() {
 
     return formattedDate;
   };
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await fetch("http://localhost:3000/api/task/tasks", {
-          method: "GET",
+
+  const handleComplete = async (task_id, index) => {
+    try {
+      const response = await fetch(
+        `http://localhost:3000/api/task/complete-task?task_id=${task_id}`,
+        {
+          method: "PATCH",
           credentials: "include",
           headers: {
             "Content-Type": "application/json",
             Accept: "application/json",
           },
-        });
+        }
+      );
+      if (response.ok) {
+        const updatedData = [...data];
+        updatedData[index].status = "C";
+
+        setData(updatedData);
+        console.log(data);
+      }
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch(
+          "http://localhost:3000/api/task/waiting-tasks",
+          {
+            method: "GET",
+            credentials: "include",
+            headers: {
+              "Content-Type": "application/json",
+              Accept: "application/json",
+            },
+          }
+        );
 
         const result = await response.json();
         setData(result);
@@ -203,33 +228,6 @@ export default function AllTasksTable() {
     const isAsc = orderBy === property && order === "asc";
     setOrder(isAsc ? "desc" : "asc");
     setOrderBy(property);
-  };
-
-  const handleDelete = async (task_id, index) => {
-    try {
-      const response = await fetch(
-        `http://localhost:3000/api/task/delete-task?task_id=${task_id}`,
-        {
-          method: "DELETE",
-          credentials: "include",
-          headers: {
-            "Content-Type": "application/json",
-            Accept: "application/json",
-          },
-        }
-      );
-      if (response.ok) {
-        const result = await response.json();
-        console.log(result);
-        const newData = [...data];
-        newData.splice(index, 1);
-
-        // Updating the state with the new array
-        setData(newData);
-      }
-    } catch (err) {
-      console.log(err);
-    }
   };
 
   const handleSelectAllClick = (event) => {
@@ -253,37 +251,6 @@ export default function AllTasksTable() {
   const isSelected = (id) => selected.indexOf(id) !== -1;
   const emptyRows =
     page > 0 ? Math.max(0, (1 + page) * rowsPerPage - data.length) : 0;
-  
-    const exportToCSV = () => {
-    const csvData = [];
-
-    // Adding CSV header
-    const header = headCells.slice(0, -1).map((headCell) => headCell.label);
-    console.log(header);
-    csvData.push(header);
-
-    // Adding rows
-    data.forEach((row) => {
-      const rowData = [
-        row.task_name,
-        row.task_desc,
-        row.assignee_name,
-        row.assignee_id,
-        formatDate(row.created_at),
-        formatDate(row.dead_line),
-        row.effort,
-        row.status,
-      ];
-
-      csvData.push(rowData);
-    });
-    // Convert to CSV string
-    const csvString = csvData.map((row) => row.join(",")).join("\n");
-
-    // Create a Blob and trigger download
-    const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8' });
-    saveAs(blob, 'tasks.csv');
-  };
 
   return (
     <Box sx={{ width: "100%" }}>
@@ -347,15 +314,13 @@ export default function AllTasksTable() {
                         <ReportProblemIcon style={{ color: "red" }} />
                       )}
                     </TableCell>
-                    <TableCell align="left">
-                      <div style={{ display: "flex", flexDirection: "row" }}>
-                        <EditWizard values={row} />
-                        <Button onClick={() => handleDelete(row._id, index)}>
-                          <DeleteIcon
-                            style={{ color: "red", padding: "4px" }}
-                          />
-                        </Button>
-                      </div>
+                    <TableCell>
+                      <Button
+                        variant="contained"
+                        onClick={() => handleComplete(row._id, index)}
+                      >
+                        Approve
+                      </Button>
                     </TableCell>
                   </TableRow>
                 );
@@ -381,7 +346,6 @@ export default function AllTasksTable() {
           onPageChange={handleChangePage}
           onRowsPerPageChange={handleChangeRowsPerPage}
         />
-        <Button onClick={exportToCSV}>Export to CSV</Button>
       </Paper>
     </Box>
   );

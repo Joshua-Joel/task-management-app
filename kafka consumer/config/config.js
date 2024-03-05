@@ -1,4 +1,4 @@
-import { Kafka } from 'kafkajs';
+import {Kafka} from "kafkajs"
 
 class KafkaConfig {
   constructor() {

@@ -15,6 +15,8 @@ import { Button, Typography } from "@mui/material";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import AutorenewIcon from "@mui/icons-material/Autorenew";
 import ReportProblemIcon from "@mui/icons-material/ReportProblem";
+import { saveAs } from 'file-saver'; 
+
 
 const headCells = [
   {
@@ -187,6 +189,8 @@ export default function EnhancedTable() {
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
 
+  
+
   const handleRequestSort = (event, property) => {
     const isAsc = orderBy === property && order === "asc";
     setOrder(isAsc ? "desc" : "asc");
@@ -194,9 +198,10 @@ export default function EnhancedTable() {
   };
 
   const handleComplete = async (task_id, index) => {
+    
     try {
       const response = await fetch(
-        `http://localhost:3000/api/task/complete-task?task_id=${task_id}`,
+        `http://localhost:3000/api/task/request-approval?task_id=${task_id}`,
         {
           method: "PATCH",
           credentials: "include",
@@ -208,13 +213,16 @@ export default function EnhancedTable() {
       );
       if (response.ok) {
         const updatedData = [...data];
-        updatedData[index].status = "C"; 
+        updatedData[index].status = "W"; 
+        
         setData(updatedData);
+        console.log(data);
       }
     } catch (err) {
       console.log(err);
     }
   };
+  
 
   const handleSelectAllClick = (event) => {
     if (event.target.checked) {
@@ -226,8 +234,6 @@ export default function EnhancedTable() {
   };
 
   const handleChangePage = (event, newPage) => {
-   
-
     setPage(newPage);
   };
 
@@ -249,14 +255,49 @@ export default function EnhancedTable() {
         ),
       [page, rowsPerPage,data],
     );
+  const exportToCSV = () => {
+    const csvData = [];
 
-    // [...data].slice(page * rowsPerPage,page * rowsPerPage + rowsPerPage);
+    // Adding CSV header
+    const header = headCells.slice(0, -1).map((headCell) => headCell.label);
+    console.log(header);
+    csvData.push(header);
 
-    // console.log(page)
+    // Adding rows
+    data.forEach((row) => {
+      const rowData = [
+        row.task_name,
+        row.task_desc,
+        row.assigner_name,
+        row.assigner_id,
+        formatDate(row.created_at),
+        formatDate(row.dead_line),
+        row.effort,
+        row.status,
+      ];
+
+      csvData.push(rowData);
+    });
+
+    // Convert to CSV string
+    const csvString = csvData.map((row) => row.join(",")).join("\n");
+
+    // Create a Blob and trigger download
+    const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8' });
+    saveAs(blob, 'my_tasks.csv');
+  };
+
+    
+
+    
+    
 
   return (
+
+    
     
     <Box sx={{ width: "100%" }}>
+     
       <Paper sx={{ width: "100%", mb: 2 }}>
         <EnhancedTableToolbar numSelected={selected.length} />
         <TableContainer>
@@ -320,21 +361,32 @@ export default function EnhancedTable() {
                     <TableCell align="left">
                       <div style={{ display: "flex", flexDirection: "row" }}>
                       {
-                        row.status==='C'?
-                        // <p>Completed</p>
+
+                       
+                        row.status === 'P'?
                         <Button
                         variant="contained"
-                        disabled="true"
+                        onClick={() => handleComplete(row._id, index)}
                       >
-                        Completed
+                        Complete
                       </Button>
-                        :
-                          <Button
+                      :
+                      row.status === 'C'?
+                      <Button
                           variant="contained"
-                          onClick={() => handleComplete(row._id, index)}
+                          disabled={true}
                         >
-                          Complete
+                          Completed
                         </Button>
+                        :
+                        <Button
+                          variant="contained"
+                          disabled={true}
+                        >
+                          Pending
+                        </Button>
+                  
+                      
                       }
                         
                       </div>
@@ -363,6 +415,7 @@ export default function EnhancedTable() {
           onPageChange={handleChangePage}
           onRowsPerPageChange={handleChangeRowsPerPage}
         />
+        <Button onClick={exportToCSV}>Export to CSV</Button>
       </Paper>
     </Box>
   );

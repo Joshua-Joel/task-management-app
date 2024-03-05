@@ -1,50 +1,19 @@
-const { Kafka } = require('kafkajs');
-const kafkaConfig = require('./config/kafkaConfig');
+import  KafkaConfig from "./config/config.js"
+import { sendMail } from './services/mailService.js';
 
-const consumer = new Kafka({
-  clientId: kafkaConfig.clientId,
-  brokers: kafkaConfig.brokers,
-  retry: {
-    maxRetryTime: 5000, // Adjust as needed
-    initialRetryTime: 300, // Adjust as needed
-    factor: 1, // Adjust as needed
-    retries: 5, // Adjust as needed
-  },
-}).consumer({ groupId: 'group-1' });
-
-const runConsumer = async () => {
-  try {
-    // Connect to the Kafka cluster
-    await consumer.connect();
-
-    // Subscribe to the topic you want to consume
-    await consumer.subscribe({ topic: 'topic-1' });
-
-    // Start consuming messages
-    await consumer.run({
-      eachMessage: async ({ topic, partition, message }) => {
-        console.log({
-          value: message.value.toString(),
-        });
-
-        // Here, you can add your logic to process each consumed message
-      },
+const kafkaConfig = new KafkaConfig();
+kafkaConfig.consume("my-topic",(value)=>{
+  console.log("Received :",JSON.parse(value));
+  const message = JSON.parse(value);
+  const {user_email,task_name,dead_line} = message;
+  console.log(user_email,task_name,dead_line);
+  const email_body = "You have a pending task("+task_name+") and its deadine is "+ dead_line;
+  const email_subject = "Task reminder..!";
+  sendMail(user_email, email_subject, email_body)
+    .then(response => {
+        console.log('Email sent successfully:', response);
+    })
+    .catch(error => {
+        console.error('Error sending email:', error);
     });
-  } catch (error) {
-    console.error('Error in Kafka consumer:', error);
-  }
-};
-
-// Run the consumer
-runConsumer().catch(console.error);
-
-// Optionally, handle shutdown gracefully
-process.on('SIGINT', async () => {
-  try {
-    await consumer.disconnect();
-    process.exit(0);
-  } catch (err) {
-    console.error('Error disconnecting Kafka consumer:', err);
-    process.exit(1);
-  }
-});
+})

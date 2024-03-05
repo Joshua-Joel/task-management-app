@@ -1,9 +1,10 @@
-require("dotenv").config();
-const mongoose = require("../../services/db");
+import dotenv from 'dotenv';
+import mongoose from '../../services/db.js';
+import User from '../../models/User.js';
+import Task from '../../models/Task.js';
+// import userService from '../../services/userService';
+import cron from 'node-cron';
 
-const User = require("../../models/User");
-const Task = require("../../models/Task");
-const userService = require("../../services/userService")
-const cron = require('node-cron');
+dotenv.config();
 
-module.exports = {cron,User,Task,userService}; 
+export default cron;
