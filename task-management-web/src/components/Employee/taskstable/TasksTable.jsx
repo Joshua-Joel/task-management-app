@@ -16,6 +16,7 @@ import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import AutorenewIcon from "@mui/icons-material/Autorenew";
 import ReportProblemIcon from "@mui/icons-material/ReportProblem";
 import { saveAs } from 'file-saver'; 
+import html2canvas from 'html2canvas';
 import {
   BarChart,
   Bar,
@@ -234,6 +235,22 @@ const MyScatterChart = ({ data }) => {
       </Scatter>
     </ScatterChart>
   );
+};
+const downloadReportAsImage = async (containerId, fileName) => {
+  try {
+    const container = document.getElementById(containerId);
+
+    // Use html2canvas to capture the entire container as an image
+    const canvas = await html2canvas(container);
+
+    // Convert the canvas to a Blob
+    canvas.toBlob((blob) => {
+      // Save the Blob as a file using file-saver
+      saveAs(blob, `${fileName}.png`);
+    });
+  } catch (error) {
+    console.error('Error downloading report:', error);
+  }
 };
 export default function EnhancedTable() {
   const [data, setData] = useState([]);
@@ -523,7 +540,7 @@ export default function EnhancedTable() {
           onPageChange={handleChangePage}
           onRowsPerPageChange={handleChangeRowsPerPage}
         />
-        <Box sx={{ display: "flex", flexDirection: "row", flexWrap: "wrap" , gap: "20%"}}>
+        <Box sx={{ display: "flex", flexDirection: "row", flexWrap: "wrap" , gap: "20%"}} id="reportContainer">
         <Box sx={{ width: "33%", marginRight: "2%" }}>
           <MyBarChart data={data} />
         </Box>
@@ -541,6 +558,9 @@ export default function EnhancedTable() {
           <MyScatterChart data={transformedData} />
         </Box>
         </Box>
+        <Button sx={{left:"45%"}} onClick={() => downloadReportAsImage('reportContainer', 'chart_report')}>
+          Download Report
+        </Button>
       </Paper>
     </Box>
   );
