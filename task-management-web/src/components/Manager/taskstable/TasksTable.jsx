@@ -18,7 +18,7 @@ import { Button,InputLabel, Typography } from "@mui/material";
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import AutorenewIcon from '@mui/icons-material/Autorenew';
 import ReportProblemIcon from '@mui/icons-material/ReportProblem';
-import EditWizard from "../EditWizard/EditWizard";
+import EditWizard from "../editwizard/EditWizard";
 import { saveAs } from 'file-saver';
 import MenuItem from "@mui/material/MenuItem";
 import Select from "@mui/material/Select";
