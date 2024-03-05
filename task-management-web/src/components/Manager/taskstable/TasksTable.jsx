@@ -317,7 +317,7 @@ export default function AllTasksTable() {
   const handleFilter=(data)=>{
     setType(data.type);
     console.log(data);
-    if(Filttype=='Status'){
+    if(Filttype==='Status'){
       setStatus(data.value);
     }else{
       setFromDate(data.from)
@@ -467,7 +467,7 @@ export default function AllTasksTable() {
             />
             <TableBody>
               {data.filter((item)=>{
-                if(Filttype==''){
+                if(Filttype===''){
                   return item;
                 }
                 if(Filttype==='Status'){
