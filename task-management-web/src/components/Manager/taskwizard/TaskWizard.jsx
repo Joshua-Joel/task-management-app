@@ -70,6 +70,7 @@ export default function TaskWizard() {
         effort: "",
       });
       setOpen(false);
+      setEmailError(false);
       setEffortError(false);
     }
     } catch (err) {

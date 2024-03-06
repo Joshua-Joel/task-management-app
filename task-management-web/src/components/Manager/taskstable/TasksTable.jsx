@@ -19,7 +19,7 @@ import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import AutorenewIcon from '@mui/icons-material/Autorenew';
 import ReportProblemIcon from '@mui/icons-material/ReportProblem';
 import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty';
-import EditWizard from "../editwizard/EditWizard";
+import EditWizard from "../EditWizard/EditWizard";
 import { saveAs } from 'file-saver';
 import html2canvas from 'html2canvas';
 import MenuItem from "@mui/material/MenuItem";
