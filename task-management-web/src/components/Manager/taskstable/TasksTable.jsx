@@ -19,7 +19,7 @@ import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import AutorenewIcon from '@mui/icons-material/Autorenew';
 import ReportProblemIcon from '@mui/icons-material/ReportProblem';
 import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty';
-import EditWizard from "../EditWizard/EditWizard";
+import EditWizard from "../editwizard/EditWizard";
 import { saveAs } from 'file-saver';
 import html2canvas from 'html2canvas';
 import MenuItem from "@mui/material/MenuItem";
@@ -532,6 +532,15 @@ export default function AllTasksTable() {
   const isSelected = (id) => selected.indexOf(id) !== -1;
   const emptyRows =
     page > 0 ? Math.max(0, (1 + page) * rowsPerPage - data.length) : 0;
+
+    const visibleRows = React.useMemo(
+      () =>
+        [...data].slice(
+          page * rowsPerPage,
+          page * rowsPerPage + rowsPerPage,
+        ),
+      [page, rowsPerPage,data],
+    );
   
     const exportToCSV = () => {
     const csvData = [];
@@ -584,7 +593,7 @@ export default function AllTasksTable() {
               rowCount={data.length}
             />
             <TableBody>
-              {data.filter((item)=>{
+              {visibleRows.filter((item)=>{
                 if(Filttype===''){
                   return item;
                 }
