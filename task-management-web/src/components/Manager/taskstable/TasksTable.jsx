@@ -26,9 +26,6 @@ import MenuItem from "@mui/material/MenuItem";
 import Select from "@mui/material/Select";
 import FormControl from "@mui/material/FormControl";
 import TextField from "@mui/material/TextField";
-import { useLocation } from "react-router-dom";
-
-
 import {
   BarChart,
   Bar,
@@ -397,9 +394,6 @@ const downloadReportAsImage = async (containerId, fileName) => {
 };
 
 export default function AllTasksTable() {
-
-  
-
   const [data, setData] = useState([]);
   const formatDate = (inputDate) => {
     const date = new Date(inputDate);
@@ -430,7 +424,6 @@ export default function AllTasksTable() {
   const [state,setStatus]=useState("");
   const [fromDate,setFromDate]=useState(new Date());
   const [toDate,setToDate]=useState(new Date());
-  const location = useLocation();
 
   const handleFilter=(data)=>{
     setType(data.type);
@@ -465,6 +458,7 @@ export default function AllTasksTable() {
             Accept: "application/json",
           },
         });
+
         const result = await response.json();
         result.sort(sortByStatus);
         setData(result);
@@ -474,18 +468,12 @@ export default function AllTasksTable() {
     };
 
     fetchData();
-    
-    
-    console.log("Directed data here",location.state)
-    setType("Status")
-    setStatus(location.state.status);
-
-  }, []);
+  }, [Filttype]);
   const [order, setOrder] = React.useState("asc");
   const [orderBy, setOrderBy] = React.useState("calories");
   const [selected, setSelected] = React.useState([]);
   const [page, setPage] = React.useState(0);
-  const [rowsPerPage, setRowsPerPage] = React.useState(10);
+  const [rowsPerPage, setRowsPerPage] = React.useState(5);
 
   const handleRequestSort = (event, property) => {
     const isAsc = orderBy === property && order === "asc";
@@ -685,7 +673,7 @@ export default function AllTasksTable() {
           </Table>
         </TableContainer>
         <TablePagination
-          rowsPerPageOptions={[10, 25]}
+          rowsPerPageOptions={[5, 10, 25]}
           component="div"
           count={data.length}
           rowsPerPage={rowsPerPage}
