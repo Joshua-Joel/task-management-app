@@ -254,6 +254,27 @@ router.patch(
 );
 
 router.patch(
+  "/decline-task",
+  authenticateToken((role = "manager")),
+  async (req, res) => {
+    try {
+      const task_id = req.query.task_id;
+      const updated_task = await Task.updateOne(
+        { _id: task_id },
+        { status: "P" }
+      );
+      if (updated_task) {
+        res.status(200).json({ message: "task updated successfully" });
+      } else {
+        res.status(400).json({ message: "task not found" });
+      }
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  }
+);
+
+router.patch(
   "/request-approval",
   authenticateToken((role = "")),
   async (req, res) => {
@@ -264,7 +285,7 @@ router.patch(
         { status: "W" }
       );
       if (updated_task) {
-        res.status(200).json({ message: "task completed successfully" });
+        res.status(200).json({ message: "task updated successfully" });
       } else {
         res.status(400).json({ message: "task not found" });
       }

@@ -60,6 +60,22 @@ router.patch("/change-password",authenticateToken(role=""),async (req,res)=>{
   }
 })
 
+router.get("/employees",authenticateToken(role="manager"), async (req,res)=>{
+  try{
+    console.log("check")
+    const employees = await User.find({role:"employee"},{user_name:1,user_email:1});
+    if(!employees){
+      return res.status(400).json({message: "no employees"});
+    }
+    else{
+      res.status(200).json(employees);
+    }
+  }
+  catch(error) {
+    res.status(500).json({ error: error.message });
+  }
+})
+
 router.get("/logout",(req,res)=>{
   res.cookie('token', '', { expires: new Date(0) });
   res.json({ redirect: '/login' });

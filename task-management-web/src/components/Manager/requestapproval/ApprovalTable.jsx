@@ -17,7 +17,7 @@ import { Button, Typography } from "@mui/material";
 // import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 // import AutorenewIcon from "@mui/icons-material/Autorenew";
 // import ReportProblemIcon from "@mui/icons-material/ReportProblem";
-import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty';
+import HourglassEmptyIcon from "@mui/icons-material/HourglassEmpty";
 
 const headCells = [
   {
@@ -38,12 +38,12 @@ const headCells = [
     disablePadding: false,
     label: "Employee",
   },
-  {
-    id: "Employee id",
-    numeric: false,
-    disablePadding: false,
-    label: "Employee id",
-  },
+  // {
+  //   id: "Employee id",
+  //   numeric: false,
+  //   disablePadding: false,
+  //   label: "Employee id",
+  // },
   {
     id: "Created on",
     numeric: false,
@@ -184,7 +184,28 @@ export default function ApprovalTable() {
         }
       );
       if (response.ok) {
-        
+        setData(data.splice(index, 1));
+        console.log(data);
+      }
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  const handleDecline = async (task_id, index) => {
+    try {
+      const response = await fetch(
+        `http://localhost:3000/api/task/decline-task?task_id=${task_id}`,
+        {
+          method: "PATCH",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+        }
+      );
+      if (response.ok) {
         setData(data.splice(index, 1));
         console.log(data);
       }
@@ -296,7 +317,7 @@ export default function ApprovalTable() {
                     <TableCell align="left">{row.task_name}</TableCell>
                     <TableCell align="left">{row.task_desc}</TableCell>
                     <TableCell align="left">{row.assignee_name}</TableCell>
-                    <TableCell align="left">{row.assignee_id}</TableCell>
+                    {/* <TableCell align="left">{row.assignee_id}</TableCell> */}
                     <TableCell align="left">
                       {formatDate(row.created_at)}
                     </TableCell>
@@ -308,12 +329,24 @@ export default function ApprovalTable() {
                       <HourglassEmptyIcon></HourglassEmptyIcon>
                     </TableCell>
                     <TableCell>
-                      <Button
-                        variant="contained"
-                        onClick={() => handleComplete(row._id, index)}
-                      >
-                        Approve
-                      </Button>
+                      <div style={{display:"flex",flexDirection:"row",justifyContent:"space-evenly"}}>
+                        <Button
+                          variant="contained"
+                          onClick={() => handleComplete(row._id, index)}
+                          size="small"
+                          style={{margin:"5px"}}
+                        >
+                          Approve
+                        </Button>
+                        <Button
+                          variant="contained"
+                          onClick={() => handleDecline(row._id, index)}
+                          size="small"
+                          style={{margin:"5px"}}
+                        >
+                          Decline
+                        </Button>
+                      </div>
                     </TableCell>
                   </TableRow>
                 );

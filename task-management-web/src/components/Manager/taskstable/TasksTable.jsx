@@ -59,12 +59,12 @@ const headCells = [
     disablePadding: false,
     label: "Employee",
   },
-  {
-    id: "Employee id",
-    numeric: false,
-    disablePadding: false,
-    label: "Employee id",
-  },
+  // {
+  //   id: "Employee id",
+  //   numeric: false,
+  //   disablePadding: false,
+  //   label: "Employee id",
+  // },
   {
     id: "Created on",
     numeric: false,
@@ -630,7 +630,7 @@ export default function AllTasksTable() {
                     <TableCell align="left">{row.task_name}</TableCell>
                     <TableCell align="left">{row.task_desc}</TableCell>
                     <TableCell align="left">{row.assignee_name}</TableCell>
-                    <TableCell align="left">{row.assignee_id}</TableCell>
+                    {/* <TableCell align="left">{row.assignee_id}</TableCell> */}
                     <TableCell align="left">
                       {formatDate(row.created_at)}
                     </TableCell>

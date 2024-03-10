@@ -1,15 +1,40 @@
 import * as React from "react";
 import Button from "@mui/material/Button";
 import Dialog from "@mui/material/Dialog";
-import  {Alert}  from "@mui/material";
+import { Alert, Autocomplete } from "@mui/material";
 import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
 
 import { Box, FormControl, TextField } from "@mui/material";
 
 export default function TaskWizard() {
   const [open, setOpen] = React.useState(false);
-  const [emailError,setEmailError] = React.useState(false);
-  const [effortError,setEffortError] = React.useState(false);
+  const [emailError, setEmailError] = React.useState(false);
+  const [effortError, setEffortError] = React.useState(false);
+  const [employees, setEmployees] = React.useState([]);
+
+  React.useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch(
+          "http://localhost:3000/api/user/employees",
+          {
+            method: "GET",
+            credentials: "include",
+            headers: {
+              "Content-Type": "application/json",
+              Accept: "application/json",
+            },
+          }
+        );
+        const result = await response.json();
+        console.log(JSON.stringify(result));
+        setEmployees(result);
+      } catch (err) {
+        console.log(err);
+      }
+    };
+    fetchData();
+  }, []);
   const [taskData, setTaskData] = React.useState({
     assignee_email: "",
     task_name: "",
@@ -18,7 +43,6 @@ export default function TaskWizard() {
     effort: "",
   });
 
- 
   const handleClickOpen = () => {
     setOpen(true);
   };
@@ -30,64 +54,55 @@ export default function TaskWizard() {
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setTaskData({ ...taskData, [name]: value });
-    
   };
 
   const handleAssign = async () => {
-    const days = calculateDaysBetweenDates(formattedDate,taskData.dead_line);
+    const days = calculateDaysBetweenDates(formattedDate, taskData.dead_line);
     console.log(taskData);
-    if(taskData.effort > days || taskData.effort <= 0)
-    {
+    if (taskData.effort > days || taskData.effort <= 0) {
       setEffortError(true);
-    }
-    else{
-    try {
-      const response = await fetch(
-        "http://localhost:3000/api/task/assign-task",
-        {
-          method: "POST",
-          redirect: "follow",
-          credentials: "include",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(taskData),
+    } else {
+      try {
+        const response = await fetch(
+          "http://localhost:3000/api/task/assign-task",
+          {
+            method: "POST",
+            redirect: "follow",
+            credentials: "include",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(taskData),
+          }
+        );
+        const res = await response.json();
+        if (res.message === "employee not found..!") {
+          setEmailError(true);
+        } else {
+          console.log(res);
+          setTaskData({
+            assignee_email: "",
+            task_name: "",
+            task_desc: "",
+            dead_line: "",
+            effort: "",
+          });
+          setOpen(false);
+          setEmailError(false);
+          setEffortError(false);
         }
-      );
-      const res = await response.json();
-      if(res.message === "employee not found..!")
-      {
-        setEmailError(true);
+      } catch (err) {
+        console.log(err);
       }
-      else
-    {
-      console.log(res);
-      setTaskData({
-        assignee_email: "",
-        task_name: "",
-        task_desc: "",
-        dead_line: "",
-        effort: "",
-      });
-      setOpen(false);
-      setEmailError(false);
-      setEffortError(false);
     }
-    } catch (err) {
-      console.log(err);
-    }
-  
-  }
-
-  
   };
 
   const today = new Date();
   function formatDateToYYYYMMDD(date) {
     const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-  
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+
     return `${year}-${month}-${day}`;
   }
   const formattedDate = formatDateToYYYYMMDD(today);
@@ -156,29 +171,43 @@ export default function TaskWizard() {
             }}
           >
             <FormControl sx={{ width: "45ch" }}>
-              <TextField
+              {/* <TextField
                 style={{ margin: " 10px 0 10px 0" }}
                 name="assignee_email"
                 label="Assignee email"
                 variant="outlined"
-                required="true"
+                required={true}
                 value={taskData.assignee_email}
                 onChange={handleInputChange}
+              /> */}
+              <Autocomplete
+                style={{ margin: " 10px 0 10px 0",width:"100%" }}
+                name="assignee_email"
+                disablePortal
+                options={employees}
+                getOptionLabel={(option) => option.user_email} // Uses `user_name` for displaying options
+                onChange={(event, value) =>
+                  setTaskData({...taskData,assignee_email:value ? value.user_email : ""})
+                }
+                sx={{ width: 300 }}
+                renderInput={(params) => (
+                  <TextField {...params} label="Assignee name" />
+                )}
               />
               {emailError && (
-              <Alert
-                icon={<ErrorOutlineIcon fontSize="inherit" />}
-                severity="error"
-              >
-               Employee Not Found..!
-              </Alert>
-            )}
+                <Alert
+                  icon={<ErrorOutlineIcon fontSize="inherit" />}
+                  severity="error"
+                >
+                  Employee Not Found..!
+                </Alert>
+              )}
               <TextField
                 style={{ margin: " 10px 0 10px 0" }}
                 name="task_name"
                 label="Task name"
                 variant="outlined"
-                required="true"
+                required={true}
                 value={taskData.task_name}
                 onChange={handleInputChange}
               />
@@ -189,7 +218,7 @@ export default function TaskWizard() {
                 multiline
                 maxRows={4}
                 name="task_desc"
-                required="true"
+                required={true}
                 value={taskData.task_desc}
                 onChange={handleInputChange}
               />
@@ -198,14 +227,13 @@ export default function TaskWizard() {
                 label="Dead line"
                 type="date"
                 inputProps={{
-                  min:  formattedDate,
+                  min: formattedDate,
                 }}
-                
                 InputLabelProps={{
                   shrink: true,
                 }}
                 name="dead_line"
-                required="true"
+                required={true}
                 value={taskData.dead_line}
                 onChange={handleInputChange}
               />
@@ -215,34 +243,38 @@ export default function TaskWizard() {
                 name="effort"
                 label="Effort"
                 variant="outlined"
-                required="true"
-        
+                required={true}
                 value={taskData.effort}
                 onChange={handleInputChange}
               />
               {effortError && (
-              <Alert
-                icon={<ErrorOutlineIcon fontSize="inherit" />}
-                severity="error"
-              >
-               Effort can't exceed Deadline
-              </Alert>
-            )}
+                <Alert
+                  icon={<ErrorOutlineIcon fontSize="inherit" />}
+                  severity="error"
+                >
+                  Effort can't exceed Deadline
+                </Alert>
+              )}
               <Button
                 style={{ margin: "20px 0" }}
                 variant="contained"
                 onClick={handleAssign}
-                
-                disabled = {!(taskData.assignee_email && taskData.task_name && taskData.task_desc && taskData.dead_line && taskData.effort)}
+                disabled={
+                  !(
+                    taskData.assignee_email &&
+                    taskData.task_name &&
+                    taskData.task_desc &&
+                    taskData.dead_line &&
+                    taskData.effort
+                  )
+                }
               >
                 Assign
               </Button>
-            
             </FormControl>
           </div>
         </Box>
       </Dialog>
-
     </React.Fragment>
   );
 }
